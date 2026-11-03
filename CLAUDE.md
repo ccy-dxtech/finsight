@@ -7,7 +7,7 @@
 - Next.js (App Router) + TypeScript strict mode
 - Tailwind CSS
 - Supabase: Google 로그인(Auth) + Postgres(RLS)
-- Claude API (`@anthropic-ai/sdk`): Haiku 5.5(열 매핑·분류), Opus 5.5(인사이트 리포트)
+- Claude API (`@anthropic-ai/sdk`): Haiku 5.5(열 매핑·분류), 인사이트 리포트는 Free=Sonnet 5.5 / Pro=Opus 5.5
 - Polar (`@polar-sh/nextjs`): 구독 결제, sandbox 환경만
 - Vitest (테스트), Vercel (배포)
 
@@ -18,7 +18,8 @@
 - CRITICAL: Pro 여부는 Polar 웹훅이 갱신한 `profiles.plan` 값으로만 판단한다. 결제 성공 리다이렉트 파라미터나 클라이언트 값으로 판단하지 말 것.
 - CRITICAL: 업로드한 원본 파일은 저장하지 않는다(메모리에서 처리 후 폐기). 날짜·가맹점·금액 외의 열(카드번호, 이름 등)은 버린다.
 - 컴포넌트는 `src/components/`, 타입은 `src/types/`, 순수 로직은 `src/lib/`, 외부 API 래퍼는 `src/services/`에 둔다.
-- 화면 문구와 AI 리포트는 한국어. 금액은 원 단위 정수(`bigint`)로 다룬다(부동소수점 금지).
+- 화면 문구와 AI 리포트는 한국어가 먼저다. 영어 UI 문구(Get started, Upgrade 등)를 쓰지 않는다. 화면 규칙은 `docs/UI_GUIDE.md`의 "한국어 우선"을 따른다.
+- 금액은 원 단위 정수(`bigint`)로 다룬다(부동소수점 금지).
 - MVP 원칙: 같은 문제는 한 가지 단순한 방법으로 푼다. 처리하지 않는 경우는 `docs/PRD.md`의 "한계"에 적는다.
 
 ## 개발 프로세스

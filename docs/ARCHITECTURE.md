@@ -14,7 +14,7 @@ src/
 │   │   ├── trends/page.tsx         # 월별 추이 (Pro)
 │   │   └── settings/page.tsx       # 플랜, 구독 관리, 데이터 삭제, 로그아웃
 │   └── api/
-│       ├── analyze/route.ts        # POST: 업로드 → 분석 → 저장, 진행 상황 스트리밍
+│       ├── analyze/route.ts        # POST: 업로드 → 분석 → 저장, 끝나면 JSON 한 번 응답
 │       ├── checkout/route.ts       # GET: Polar 결제 화면으로 리다이렉트
 │       ├── portal/route.ts         # GET: Polar 고객 포털로 리다이렉트
 │       ├── webhooks/polar/route.ts # POST: Polar 웹훅 → profiles.plan 갱신
@@ -24,7 +24,7 @@ src/
 ├── lib/
 │   ├── statement/                  # 디코딩, 파싱, 마스킹, 정규화, 중복 키 (순수 함수)
 │   ├── aggregate/                  # 카테고리 합계, 월별 집계, 증감률 (순수 함수)
-│   ├── plan.ts                     # 플랜별 한도(Free 3, Pro 30), KST 월 경계
+│   ├── plan.ts                     # 플랜별 한도(Free 3, Pro 30)와 리포트 모델, KST 월 경계
 │   ├── categories.ts               # 고정 카테고리 10개 (단일 출처)
 │   └── supabase/                   # server / browser 클라이언트, 세션 갱신 헬퍼
 ├── services/
@@ -36,70 +36,68 @@ supabase/
 - 테스트는 대상 파일 옆에 `*.test.ts`로 둔다. `scripts/hooks/tdd-guard.sh`는 짝이 되는 테스트 파일이 없으면 `.ts`/`.tsx` 편집을 막는다.
 
 ## 패턴
-- **컴포넌트**: Server Components가 기본이다. 업로드·진행 표시, 차트 툴팁, 버튼처럼 상호작용이 필요한 곳만 Client Component로 만든다.
+- **컴포넌트**: Server Components가 기본이다. 업로드 폼, 삭제 확인처럼 상호작용이 필요한 곳만 Client Component로 만든다. 차트는 Server Component다.
 - **서버 전용 모듈**: 외부 API와 비밀값을 쓰는 모듈(`services/`, service role 클라이언트)은 `import "server-only"`로 클라이언트 번들 유입을 막는다.
 - **순수 함수**: 파일 처리와 집계 로직은 `lib/`의 순수 함수로 만들고 단위 테스트로 검증한다. 라우트 핸들러는 이 함수들을 조합만 한다.
-- **숫자는 코드, 해석은 AI**: 합계·건수·증감률은 `lib/aggregate`가 계산한다. AI 리포트는 거래를 id로 참조하고, 화면에 보이는 금액은 저장된 거래에서 가져온다.
+- **숫자는 코드, 해석은 AI**: 합계·건수·증감률은 `lib/aggregate`가 계산한다. AI 리포트는 거래를 id로 참조하고, 그 id를 날짜·가맹점·금액으로 바꾸는 것은 코드가 한다.
 - **런타임**: `api/analyze`는 Node.js 런타임에서 돌린다(SheetJS와 EUC-KR 디코딩 때문). `maxDuration`은 Vercel 플랜 한도 안에서 크게 잡는다.
 
 ## 데이터 모델 (Supabase Postgres)
 | 테이블 | 주요 컬럼 | 접근 |
 |---|---|---|
-| `profiles` | `id`(= auth.users.id), `plan`('free'\|'pro'), `polar_subscription_id`, `updated_at` | 본인 SELECT만. 가입 시 트리거로 생성하고, 변경은 웹훅(service role)만 |
-| `reports` | `id`, `user_id`, `file_name`, `period_start`, `period_end`, `transaction_count`, `excluded_count`, `totals`(jsonb, 코드 계산), `insights`(jsonb, AI), `created_at` | 본인 SELECT·DELETE |
-| `transactions` | `id`, `user_id`, `report_id`, `occurred_on`(date), `merchant`, `amount`(bigint, 원, 음수 가능), `category` | 본인 SELECT·DELETE |
+| `profiles` | `id`(= auth.users.id), `plan`('free'\|'pro'), `updated_at` | 본인 SELECT만. 가입 시 트리거로 생성하고, 변경은 웹훅(service role)만 |
+| `reports` | `id`, `user_id`, `file_name`, `period_start`, `period_end`, `transaction_count`, `excluded_count`, `totals`(jsonb, 코드 계산), `insights`(jsonb, AI 문장 + 코드가 채운 거래 정보), `created_at` | 본인 SELECT·DELETE |
+| `transactions` | `id`, `user_id`, `occurred_on`(date), `merchant`, `amount`(bigint, 원, 음수 가능), `category` | 본인 SELECT·DELETE. 월별 추이와 중복 확인에만 쓴다 |
 | `usage` | `user_id`, `month`(KST 월 1일), `count` | 본인 SELECT만. 데이터 삭제 시에도 남는다 |
 
-- **RPC `commit_analysis`** (security definer, `auth.uid()` 사용): 하나의 트랜잭션 안에서 아래를 처리한다.
-  1. `profiles.plan`으로 한도를 확인한다. 이번 달 `usage.count`가 한도 이상이면 오류를 낸다.
-  2. `reports`에 1행을 넣는다.
-  3. 이전 업로드에 같은 (날짜, 가맹점, 금액)이 없는 거래만 `transactions`에 넣는다. INSERT ... SELECT ... WHERE NOT EXISTS 한 문장으로 처리해서, 같은 파일 안의 겹치는 거래는 모두 들어간다.
-  4. `usage`를 upsert로 +1 한다.
-  5. `report_id`를 반환한다.
-- 한도와 플랜은 클라이언트가 보낸 값이 아니라 RPC 안에서 DB를 읽어 판단한다.
+- **RPC `commit_analysis`** (security definer, `auth.uid()` 사용): 라우트가 넘긴 리포트 1건과 새 거래 목록을 받아, 한 트랜잭션 안에서 `reports` 1행 INSERT → `transactions` INSERT → `usage` upsert +1을 하고 `report_id`를 반환한다. 판단 로직(한도, 중복)은 넣지 않는다.
+- 리포트 상세는 `reports` 한 행만 읽는다. 화면에 필요한 숫자는 `totals`와 `insights`에 다 들어 있다.
 
 ## 데이터 흐름
 
 ### 분석 (`POST /api/analyze`, multipart 파일 1개)
 ```
-세션 확인(401) → 형식·크기 확인(5MB) → plan·usage 사전 확인(빠른 실패)
-→ [진행: parse]    디코딩: xls/xlsx는 SheetJS, CSV는 UTF-8(fatal) 실패 시 EUC-KR로 읽어 SheetJS 파싱
-                    → 상단 10행 마스킹(6자리 이상 숫자) → claude.mapColumns (Haiku)
-                    → lib/statement 정규화(날짜, 원 단위 정수, 취소 음수, 해외는 원화 열, 실패 행은 제외 카운트)
-                    → 3,000건 초과·0건이면 중단 → 기존 거래 키 조회: 전부 중복이면 "이미 분석한 파일"로 중단
-→ [진행: classify] 고유 가맹점명을 200개씩 나눠 claude.classifyMerchants (Haiku, 병렬)
-→ [진행: report]   lib/aggregate로 카테고리 합계·기간 계산 → claude.writeReport (Opus 5.5)
-→ commit_analysis RPC → [done: reportId]
+1. 세션 확인(401) → 형식·크기 확인(5MB)
+2. 한도 확인: profiles.plan과 이번 달 usage.count를 읽어 한도 이상이면 중단 (한도 확인은 여기 한 곳). 이때 읽은 plan으로 리포트 모델도 정한다
+3. 파일 읽기: xls/xlsx는 SheetJS, CSV는 UTF-8(fatal) 실패 시 EUC-KR로 읽어 SheetJS 파싱
+   → 상단 10행 마스킹(6자리 이상 숫자) → claude.mapColumns (Haiku)
+   → lib/statement 정규화(날짜, 원 단위 정수, 날짜·금액을 못 읽은 행은 제외 카운트)
+   → 3,000건 초과·0건이면 중단
+4. 중복 확인: 파일 기간의 기존 거래 키를 조회해 새 거래만 골라낸다(lib/statement 순수 함수). 새 거래가 0건이면 "이미 분석한 파일"로 중단
+5. 분류: 고유 가맹점명을 200개씩 나눠 claude.classifyMerchants (Haiku, 병렬)
+6. 리포트: lib/aggregate로 카테고리 합계·기간 계산 → claude.writeReport (Free는 Sonnet 5.5, Pro는 Opus 5.5)
+   → AI가 참조한 거래 id를 코드가 날짜·가맹점·금액으로 바꿔 insights에 넣는다. 없는 id를 참조한 항목은 버린다
+7. 저장: commit_analysis RPC(리포트 + 새 거래 + 사용 횟수 +1) → 응답 { reportId }
 ```
-- 응답은 NDJSON 스트림이다. 한 줄에 이벤트 하나: `{"step":"parse"}`, `{"step":"classify"}`, `{"step":"report"}`, `{"done":true,"reportId":"..."}`, `{"error":"<code>","message":"<한국어 안내>"}`.
-- 클라이언트는 이벤트로 단계를 표시하고, `done`을 받으면 `/dashboard/reports/[id]`로 이동한다.
-- RPC 전에 실패하면 DB에 아무것도 쓰지 않는다. 그래서 차감이 없고, 같은 파일로 재시도할 수 있다.
+- 응답은 끝났을 때 JSON 한 번이다. 성공은 `200 { reportId }`, 실패는 `4xx/5xx { error: "<code>", message: "<한국어 안내>" }`.
+- 클라이언트는 요청하는 동안 스피너를 보여주고, 성공하면 `/dashboard/reports/[id]`로 이동한다.
+- 7번 전에 실패하면 DB에 아무것도 쓰지 않는다. 그래서 차감이 없고, 같은 파일로 재시도할 수 있다.
+- 거래 id는 요청 안에서만 쓰는 임시 번호(파일의 행 순번)다. DB의 `transactions.id`와 연결하지 않는다.
 - 오류 코드: `unsupported_file`, `file_too_large`, `too_many_rows`, `columns_not_found`, `no_transactions`, `already_analyzed`, `quota_exceeded`, `ai_failed`.
 
 ### AI 호출 (`services/claude.ts`)
 | 함수 | 모델(env) | 입력 | 출력(구조화 출력, zod 스키마) |
 |---|---|---|---|
-| `mapColumns` | `CLAUDE_MODEL_FAST` | 마스킹된 상단 10행 | `{ headerRowIndex, dateCol, merchantCol, amountCol, krwAmountCol \| null }`, 못 찾으면 null |
+| `mapColumns` | `CLAUDE_MODEL_FAST` | 마스킹된 상단 10행 | `{ headerRowIndex, dateCol, merchantCol, amountCol }`(amountCol은 원화 이용금액 열), 못 찾으면 null |
 | `classifyMerchants` | `CLAUDE_MODEL_FAST` | 가맹점명 최대 200개 | `[{ merchant, category }]`, category는 10개 enum |
-| `writeReport` | `CLAUDE_MODEL_SMART` | 코드가 계산한 카테고리 합계 + 거래 목록(id, 날짜, 가맹점, 금액, 카테고리) | `{ summary, categoryComments[{category, comment}], recurring[{transactionIds, note}], anomalies[{transactionId, reason}], savingTips[{title, detail}] }` |
+| `writeReport` | Free `CLAUDE_MODEL_REPORT_FREE`, Pro `CLAUDE_MODEL_REPORT_PRO` | 코드가 계산한 카테고리 합계 + 거래 목록(임시 id, 날짜, 가맹점, 금액, 카테고리) | `{ summary, recurring[{transactionIds, note}], anomalies[{transactionId, reason}], savingTips[{title, detail}] }` |
 
 - **구조화 출력**: `output_config.format`에 zod 스키마를 넣고 결과를 zod로 다시 검증한다. TypeScript SDK는 `client.messages.parse()`와 `@anthropic-ai/sdk/helpers/zod`의 `zodOutputFormat`을 쓴다. 정확한 사용법은 구현 step에서 claude-api 스킬 문서로 확인한다.
 - **Haiku 호출**: `output_config.effort: "low"`.
-- **Opus 5.5 호출**:
+- **리포트 호출 (Sonnet 5.5, Opus 5.5 공통)**: 두 모델 모두 같은 프롬프트, 같은 스키마, 같은 설정을 쓰고 `model`만 다르다.
   - `output_config.effort: "medium"`을 명시한다.
   - thinking은 끌 수 없으므로 파라미터를 생략한다.
-  - 응답이 길 수 있으니 스트리밍으로 받고 `finalMessage()`로 모은다. `max_tokens`는 64000이다.
-  - 서버 측 refusal fallback을 켠다(`fallbacks: "default"` + beta `server-side-fallback-2026-07-01`).
+  - 입력(거래 목록)과 응답이 길 수 있으니 SDK 스트리밍으로 받고 `finalMessage()`로 한 번에 모은다(브라우저로 스트리밍하지 않음). `max_tokens`는 64000이다.
 - **실패 처리**: `stop_reason`이 `refusal`이나 `max_tokens`이거나, 스키마 검증에 실패하면 `ai_failed`로 처리한다. 재시도는 SDK 기본값(2회)에 맡긴다.
 - **기타**: 프롬프트 캐싱은 쓰지 않는다. 시스템 프롬프트가 짧아 최소 캐시 길이에 못 미친다. 리포트 프롬프트에는 "금액을 계산해 쓰지 말고 거래 id로 참조하라"는 지시를 넣는다.
 
 ### 결제 (Polar, `@polar-sh/nextjs`, `POLAR_SERVER=sandbox`)
 ```
-"Pro 구독하기" → /api/checkout (비로그인이면 /login?next=/api/checkout)
+"프로 구독하기" → /api/checkout (비로그인이면 /login?next=/api/checkout)
   → 세션의 user.id를 external customer id로 서버에서 지정하고 POLAR_PRO_PRODUCT_ID로 결제 생성 → Polar 결제 화면
   → successUrl: /dashboard?checkout=success ("결제 확인 중" 안내만 표시, 플랜 판단에는 쓰지 않음)
 Polar → /api/webhooks/polar (POLAR_WEBHOOK_SECRET 서명 검증)
-  subscription.active  → profiles.plan = 'pro', polar_subscription_id 저장
+  subscription.active  → profiles.plan = 'pro'
   subscription.revoked → profiles.plan = 'free'
   subscription.canceled → 아무것도 하지 않음 (기간 끝까지 Pro, 끝나면 revoked가 옴)
 "구독 관리" → /api/portal → 세션 user.id로 고객 포털 세션 생성 → Polar 고객 포털
@@ -112,7 +110,7 @@ Polar → /api/webhooks/polar (POLAR_WEBHOOK_SECRET 서명 검증)
 
 ## 상태 관리
 - 서버 상태는 Server Components에서 Supabase(사용자 세션 + RLS)로 읽는다. 변경 후에는 `router.refresh()`나 이동으로 다시 읽는다.
-- 클라이언트 상태는 업로드 진행 단계와 오류 메시지 정도라서 `useState`로 충분하다. 전역 상태 라이브러리는 쓰지 않는다.
+- 클라이언트 상태는 분석 중 여부와 오류 메시지 정도라서 `useState`로 충분하다. 전역 상태 라이브러리는 쓰지 않는다.
 
 ## 환경 변수 (`.env`, git 제외)
 | 변수 | 용도 | 노출 |
@@ -121,7 +119,8 @@ Polar → /api/webhooks/polar (POLAR_WEBHOOK_SECRET 서명 검증)
 | `SUPABASE_SERVICE_ROLE_KEY` | 웹훅의 profiles 갱신 | 서버 전용 |
 | `ANTHROPIC_API_KEY` | Claude API | 서버 전용 |
 | `CLAUDE_MODEL_FAST` = `claude-haiku-5-5` | 열 매핑, 분류 | 서버 전용 |
-| `CLAUDE_MODEL_SMART` = `claude-opus-5-5` | 인사이트 리포트 | 서버 전용 |
+| `CLAUDE_MODEL_REPORT_FREE` = `claude-sonnet-5-5` | Free 인사이트 리포트 | 서버 전용 |
+| `CLAUDE_MODEL_REPORT_PRO` = `claude-opus-5-5` | Pro 인사이트 리포트 | 서버 전용 |
 | `POLAR_SERVER` = `sandbox`, `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, `POLAR_PRO_PRODUCT_ID` | 결제 | 서버 전용 |
 | `NEXT_PUBLIC_SITE_URL` | OAuth·결제 리다이렉트 기준 URL | 공개 |
 | `NEXT_PUBLIC_PRO_PRICE_LABEL` = `월 1,000원` | 랜딩·업그레이드 안내의 가격 표시 | 공개 |

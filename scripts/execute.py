@@ -10,6 +10,7 @@ import argparse
 import contextlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 import threading
@@ -178,11 +179,11 @@ class StepExecutor:
         sections = []
         claude_md = ROOT / "CLAUDE.md"
         if claude_md.exists():
-            sections.append(f"## 프로젝트 규칙 (CLAUDE.md)\n\n{claude_md.read_text()}")
+            sections.append(f"## 프로젝트 규칙 (CLAUDE.md)\n\n{claude_md.read_text(encoding='utf-8')}")
         docs_dir = ROOT / "docs"
         if docs_dir.is_dir():
             for doc in sorted(docs_dir.glob("*.md")):
-                sections.append(f"## {doc.stem}\n\n{doc.read_text()}")
+                sections.append(f"## {doc.stem}\n\n{doc.read_text(encoding='utf-8')}")
         return "\n\n---\n\n".join(sections) if sections else ""
 
     @staticmethod
@@ -234,10 +235,15 @@ class StepExecutor:
             print(f"  ERROR: {step_file} not found")
             sys.exit(1)
 
-        prompt = preamble + step_file.read_text()
+        prompt = preamble + step_file.read_text(encoding="utf-8")
+        # 프롬프트는 stdin으로 넘긴다: Windows 명령줄은 32,767자까지라 문서 전체를 인자로 넣을 수 없다.
+        # 인코딩은 UTF-8로 고정한다: Windows 기본 인코딩(cp949)으로는 한국어·기호가 깨진다.
+        # 실행 파일은 전체 경로로 찾는다: Windows의 npm 설치본(claude.cmd)은 이름만으로 실행되지 않는다.
+        claude_bin = shutil.which("claude") or "claude"
         result = subprocess.run(
-            ["claude", "-p", "--dangerously-skip-permissions", "--output-format", "json", prompt],
-            cwd=self._root, capture_output=True, text=True, timeout=1800,
+            [claude_bin, "-p", "--dangerously-skip-permissions", "--output-format", "json"],
+            input=prompt, cwd=self._root, capture_output=True,
+            text=True, encoding="utf-8", errors="replace", timeout=1800,
         )
 
         if result.returncode != 0:
@@ -251,7 +257,7 @@ class StepExecutor:
             "stdout": result.stdout, "stderr": result.stderr,
         }
         out_path = self._phase_dir / f"step{step_num}-output.json"
-        with open(out_path, "w") as f:
+        with open(out_path, "w", encoding="utf-8") as f:
             json.dump(output, f, indent=2, ensure_ascii=False)
 
         return output

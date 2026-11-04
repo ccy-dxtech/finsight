@@ -1,0 +1,179 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+/* FinSight component styles — every value comes from tokens.css custom properties. Prefix fs-. */
+body, .fs-root { font-family: var(--font-sans); color: var(--ink); -webkit-font-smoothing: antialiased;
+  word-break: keep-all; overflow-wrap: anywhere; line-break: strict; }
+.fs-num { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+.fs-num-xl { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 40px; line-height: 1.2; font-weight: 700; letter-spacing: -1px; }
+.fs-num-lg { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 24px; line-height: 1.3; font-weight: 700; letter-spacing: -0.4px; }
+.fs-num-md { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 16px; line-height: 1.5; font-weight: 600; }
+.fs-unit { font-size: 0.6em; font-weight: 600; margin-left: 2px; }
+.fs-muted { color: var(--muted); }
+.fs-body { color: var(--body); }
+.fs-up { color: var(--change-up); }
+.fs-down { color: var(--change-down); }
+.fs-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* ---------- Buttons ---------- */
+.fs-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xs);
+  height: 44px; padding: var(--space-sm) var(--space-md); border: 0; border-radius: var(--radius-pill);
+  font-family: var(--font-sans); font-size: 16px; line-height: 1.2; font-weight: 600; cursor: pointer;
+  text-decoration: none; white-space: nowrap; box-sizing: border-box; }
+.fs-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.fs-btn--primary { background: var(--primary); color: var(--on-primary); }
+.fs-btn--primary:active, .fs-btn--primary.is-active { background: var(--primary-active); }
+.fs-btn--primary:disabled, .fs-btn--primary.is-disabled { background: var(--primary-disabled); cursor: not-allowed; }
+.fs-btn--secondary { background: var(--surface-strong); color: var(--ink); }
+.fs-btn--text { background: transparent; color: var(--primary); padding-left: 0; padding-right: 0; height: auto; }
+.fs-btn--danger { background: var(--canvas); color: var(--danger); box-shadow: inset 0 0 0 1px var(--danger); }
+.fs-btn--google { background: var(--canvas); color: var(--ink); box-shadow: inset 0 0 0 1px var(--border-strong); }
+.fs-btn--lg { height: 56px; padding: var(--space-base) var(--space-xl); font-size: 17px; }
+.fs-btn--block { display: flex; width: 100%; }
+
+/* ---------- Badge ---------- */
+.fs-badge { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: var(--radius-pill);
+  background: var(--surface-strong); color: var(--body); font-size: 13px; line-height: 1.4; font-weight: 600; white-space: nowrap; }
+.fs-badge--pro { background: var(--primary-soft); color: var(--primary); }
+.fs-badge--lock { background: var(--surface-strong); color: var(--muted); }
+
+/* ---------- Notice ---------- */
+.fs-notice { display: flex; gap: var(--space-sm); align-items: flex-start; padding: var(--space-sm) var(--space-base);
+  border-radius: var(--radius-md); background: var(--surface-strong); color: var(--body); font-size: 14px; line-height: 1.6; }
+.fs-notice strong { color: var(--ink); font-weight: 600; }
+.fs-notice--success { background: var(--primary-soft); color: var(--ink); }
+.fs-notice--error { background: var(--danger-soft); color: var(--ink); }
+.fs-notice__icon { flex: none; width: 20px; height: 20px; border-radius: var(--radius-full); display: inline-flex; align-items: center;
+  justify-content: center; font-size: 12px; font-weight: 700; background: var(--muted); color: var(--canvas); margin-top: 1px; }
+.fs-notice--success .fs-notice__icon { background: var(--primary); }
+.fs-notice--error .fs-notice__icon { background: var(--danger); }
+.fs-testnote { font-size: 13px; line-height: 1.5; color: var(--muted); }
+
+/* ---------- App header ---------- */
+.fs-header { display: flex; align-items: center; gap: var(--space-xl); height: 64px; padding: 0 var(--space-xl);
+  background: var(--canvas); border-bottom: 1px solid var(--hairline); box-sizing: border-box; }
+.fs-logo { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; color: var(--ink); text-decoration: none; }
+.fs-logo b { color: var(--primary); font-weight: 800; }
+.fs-header__tabs { display: flex; gap: var(--space-xs); list-style: none; margin: 0; padding: 0; }
+.fs-header__tabs a { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 var(--space-sm);
+  border-radius: var(--radius-pill); color: var(--body); text-decoration: none; font-size: 15px; font-weight: 500; }
+.fs-header__tabs a[aria-current="page"] { background: var(--surface-strong); color: var(--ink); font-weight: 600; }
+.fs-header__end { margin-left: auto; display: flex; align-items: center; gap: var(--space-sm); }
+
+/* ---------- Landing ---------- */
+.fs-hero { padding: var(--space-section) var(--space-xl); text-align: left; background: var(--canvas); }
+.fs-hero h1 { margin: var(--space-base) 0 0; font-size: 48px; line-height: 1.3; font-weight: 700; letter-spacing: -1px; }
+.fs-hero h1 em { font-style: normal; color: var(--primary); }
+.fs-hero p { margin: var(--space-base) 0 var(--space-xl); max-width: 520px; font-size: 18px; line-height: 1.65; color: var(--body); }
+.fs-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-lg); list-style: none; margin: 0; padding: 0; counter-reset: s; }
+.fs-steps li { counter-increment: s; padding: var(--space-xl); border-radius: var(--radius-xl); background: var(--surface-soft); }
+.fs-steps li::before { content: counter(s); display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px;
+  border-radius: var(--radius-full); background: var(--primary); color: var(--on-primary); font-weight: 700; font-size: 15px; }
+.fs-steps h3 { margin: var(--space-base) 0 var(--space-xxs); font-size: 20px; line-height: 1.45; font-weight: 700; }
+.fs-steps p { margin: 0; font-size: 15px; line-height: 1.6; color: var(--body); }
+
+.fs-tier { display: flex; flex-direction: column; gap: var(--space-lg); padding: var(--space-xl); border-radius: var(--radius-xl);
+  background: var(--canvas); box-shadow: inset 0 0 0 1px var(--hairline); box-sizing: border-box; }
+.fs-tier--pro { box-shadow: inset 0 0 0 2px var(--primary); }
+.fs-tier__head { display: flex; align-items: center; gap: var(--space-xs); font-size: 20px; font-weight: 700; }
+.fs-tier__price { font-size: 36px; line-height: 1.2; font-weight: 700; letter-spacing: -0.8px; }
+.fs-tier__price small { font-size: 15px; font-weight: 500; color: var(--body); letter-spacing: 0; margin-left: 4px; }
+.fs-tier ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-sm); font-size: 15px; line-height: 1.6; }
+.fs-tier li { display: flex; gap: var(--space-xs); }
+.fs-tier li::before { content: "✓"; color: var(--primary); font-weight: 700; }
+.fs-tier li.is-off { color: var(--muted); }
+.fs-tier li.is-off::before { content: "—"; color: var(--disabled); }
+
+.fs-footer { padding: var(--space-xxl) var(--space-xl); background: var(--surface-soft); color: var(--muted); font-size: 13px; line-height: 1.6; }
+.fs-footer nav { display: flex; gap: var(--space-lg); margin-bottom: var(--space-sm); }
+.fs-footer a { color: var(--body); text-decoration: none; font-size: 14px; }
+
+/* ---------- Cards / layout ---------- */
+.fs-card { padding: var(--space-lg); border-radius: var(--radius-xl); background: var(--canvas); box-shadow: inset 0 0 0 1px var(--hairline); box-sizing: border-box; }
+.fs-card__title { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); margin: 0 0 var(--space-base);
+  font-size: 20px; line-height: 1.45; font-weight: 700; }
+.fs-card__title small { font-size: 14px; font-weight: 500; color: var(--muted); }
+.fs-page { background: var(--surface-soft); padding: var(--space-xl); }
+
+/* ---------- Upload ---------- */
+.fs-drop { display: flex; flex-direction: column; align-items: center; gap: var(--space-sm); padding: var(--space-xxl) var(--space-lg);
+  border-radius: var(--radius-xl); border: 2px dashed var(--border-strong); background: var(--canvas); text-align: center; cursor: pointer; }
+.fs-drop:hover, .fs-drop.is-over { border-color: var(--primary); background: var(--primary-soft); }
+.fs-drop:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+.fs-drop__icon { width: 48px; height: 48px; border-radius: var(--radius-full); background: var(--primary-soft); color: var(--primary);
+  display: inline-flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; }
+.fs-drop__title { font-size: 17px; font-weight: 600; line-height: 1.5; }
+.fs-drop__hint { font-size: 14px; color: var(--muted); line-height: 1.5; }
+.fs-drop.is-disabled { cursor: not-allowed; background: var(--surface-soft); }
+
+/* ---------- Usage meter ---------- */
+.fs-usage__row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-sm); }
+.fs-usage__label { font-size: 15px; color: var(--body); }
+.fs-meter { height: 8px; margin-top: var(--space-sm); border-radius: var(--radius-pill); background: var(--surface-strong); overflow: hidden; }
+.fs-meter > span { display: block; height: 100%; border-radius: inherit; background: var(--primary); }
+.fs-meter.is-empty > span { background: var(--disabled); }
+.fs-usage__foot { margin-top: var(--space-xs); font-size: 13px; color: var(--muted); }
+
+/* ---------- Lists ---------- */
+.fs-list { list-style: none; margin: 0; padding: 0; }
+.fs-list > li { display: flex; align-items: center; gap: var(--space-base); min-height: 56px; padding: var(--space-sm) 0; border-bottom: 1px solid var(--hairline); }
+.fs-list > li:last-child { border-bottom: 0; }
+.fs-list__main { flex: 1; min-width: 0; }
+.fs-list__title { font-size: 16px; font-weight: 600; line-height: 1.5; color: var(--ink); }
+.fs-list__sub { font-size: 14px; line-height: 1.5; color: var(--muted); }
+.fs-list__end { text-align: right; flex: none; }
+.fs-list a { color: inherit; text-decoration: none; }
+.fs-icon { flex: none; width: 40px; height: 40px; border-radius: var(--radius-full); background: var(--surface-strong); color: var(--body);
+  display: inline-flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; }
+.fs-icon--accent { background: var(--primary-soft); color: var(--primary); }
+.fs-icon--alert { background: var(--danger-soft); color: var(--danger); }
+
+/* ---------- Report ---------- */
+.fs-stats { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: var(--space-lg); }
+.fs-stat__label { font-size: 14px; line-height: 1.5; color: var(--muted); margin-bottom: var(--space-xxs); }
+.fs-bars { display: grid; gap: var(--space-sm); }
+.fs-bar { display: grid; grid-template-columns: 96px 1fr 108px 44px; gap: var(--space-sm); align-items: center; font-size: 15px; }
+.fs-bar__track { height: 12px; border-radius: var(--radius-pill); background: var(--surface-strong); overflow: hidden; }
+.fs-bar__fill { display: block; height: 100%; border-radius: inherit; background: var(--primary); }
+.fs-bar__amt { text-align: right; font-weight: 600; }
+.fs-bar__pct { text-align: right; color: var(--muted); font-size: 14px; }
+.fs-tip { display: flex; gap: var(--space-base); padding: var(--space-base); border-radius: var(--radius-lg); background: var(--primary-soft); }
+.fs-tip + .fs-tip { margin-top: var(--space-sm); }
+.fs-tip__save { font-weight: 700; color: var(--primary); }
+.fs-tip__title { font-size: 16px; font-weight: 600; line-height: 1.5; }
+.fs-tip__body { font-size: 14px; line-height: 1.6; color: var(--body); margin-top: 2px; }
+
+/* ---------- Analyzing ---------- */
+.fs-analyzing { display: flex; flex-direction: column; align-items: center; gap: var(--space-base); padding: var(--space-section) var(--space-lg); text-align: center; }
+.fs-spinner { width: 40px; height: 40px; border-radius: var(--radius-full); border: 4px solid var(--primary-soft); border-top-color: var(--primary);
+  animation: fs-spin 0.9s linear infinite; }
+@keyframes fs-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .fs-spinner { animation-duration: 2.4s; } }
+.fs-analyzing p { margin: 0; font-size: 17px; font-weight: 600; line-height: 1.5; }
+
+/* ---------- Locked ---------- */
+.fs-locked { display: flex; flex-direction: column; align-items: center; gap: var(--space-sm); text-align: center;
+  padding: var(--space-xxl) var(--space-lg); border-radius: var(--radius-xl); background: var(--canvas);
+  box-shadow: inset 0 0 0 1px var(--hairline); box-sizing: border-box; }
+.fs-locked__title { font-size: 20px; font-weight: 700; line-height: 1.45; }
+.fs-locked__body { font-size: 15px; line-height: 1.6; color: var(--body); max-width: 360px; }
+
+/* ---------- Trends (월별 총지출은 Report의 .fs-bar를 그대로 써요) ---------- */
+.fs-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.fs-table th { text-align: right; font-size: 13px; font-weight: 600; color: var(--muted); padding: var(--space-xs) 0; border-bottom: 1px solid var(--border-strong); }
+.fs-table th:first-child, .fs-table td:first-child { text-align: left; }
+.fs-table td { text-align: right; padding: var(--space-sm) 0; border-bottom: 1px solid var(--hairline); }
+.fs-table td:first-child { font-weight: 600; }
+
+/* ---------- Settings ---------- */
+.fs-setting { display: flex; align-items: center; justify-content: space-between; gap: var(--space-base); padding: var(--space-base) 0; border-bottom: 1px solid var(--hairline); }
+.fs-setting:last-child { border-bottom: 0; }
+.fs-setting__title { font-size: 16px; font-weight: 600; line-height: 1.5; }
+.fs-setting__desc { font-size: 14px; line-height: 1.6; color: var(--muted); margin-top: 2px; }
+
+@media (max-width: 640px) {
+  .fs-hero h1 { font-size: 32px; letter-spacing: -0.6px; }
+  .fs-steps { grid-template-columns: 1fr; }
+  .fs-stats { grid-template-columns: 1fr 1fr; }
+  .fs-bar { grid-template-columns: 80px 1fr 96px; }
+  .fs-bar__pct { display: none; }
+}

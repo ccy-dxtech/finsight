@@ -1,7 +1,7 @@
 # 프로젝트: FinSight
 
 카드 명세서(CSV·엑셀)를 올리면 AI가 지출을 분석해 한국어 인사이트 리포트를 주는 구독형 웹앱. MVP·프로토타입 단계.
-기획은 `docs/PRD.md`, 구조는 `docs/ARCHITECTURE.md`, 결정 근거는 `docs/ADR.md`, 화면 규칙은 `docs/UI_GUIDE.md`.
+기획은 `docs/PRD.md`, 구조는 `docs/ARCHITECTURE.md`, 결정 근거는 `docs/ADR.md`, 화면 규칙은 `docs/UI_GUIDE.md`, 디자인 토큰·컴포넌트 명세는 `docs/design-system/`.
 
 ## 기술 스택
 - Next.js (App Router) + TypeScript strict mode
@@ -19,6 +19,7 @@
 - CRITICAL: 업로드한 원본 파일은 저장하지 않는다(메모리에서 처리 후 폐기). 날짜·가맹점·금액 외의 열(카드번호, 이름 등)은 버린다.
 - 컴포넌트는 `src/components/`, 타입은 `src/types/`, 순수 로직은 `src/lib/`, 외부 API 래퍼는 `src/services/`에 둔다.
 - 화면 문구와 AI 리포트는 한국어가 먼저다. 영어 UI 문구(Get started, Upgrade 등)를 쓰지 않는다. 화면 규칙은 `docs/UI_GUIDE.md`의 "한국어 우선"을 따른다.
+- CRITICAL: UI(컴포넌트, 페이지, `globals.css`)를 만들거나 고치기 전에 `docs/design-system/README.md`, `docs/design-system/tokens.css`, 해당 컴포넌트의 `docs/design-system/components/<이름>/README.md`·`preview.html`을 읽고 그 명세와 모양에 맞춘다. 디자인 시스템과 다르게 정한 것은 `docs/UI_GUIDE.md`가 우선한다. 색·글자 크기는 `globals.css`의 `@theme` 토큰만 쓴다.
 - 금액은 원 단위 정수(`bigint`)로 다룬다(부동소수점 금지).
 - MVP 원칙: 같은 문제는 한 가지 단순한 방법으로 푼다. 처리하지 않는 경우는 `docs/PRD.md`의 "한계"에 적는다.
 

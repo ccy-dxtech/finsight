@@ -1,0 +1,26 @@
+<!-- @dsCard group="Actions" height=150 -->
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><style>
+body { margin: 0; background: var(--canvas); }
+.pad { padding: var(--space-lg); }
+.row { display: flex; gap: var(--space-sm); flex-wrap: wrap; align-items: center; }
+
+</style></head>
+<body>
+<div class="pad" style="display:grid;gap:16px">
+  <div class="row">
+    <button class="fs-btn fs-btn--primary">시작하기</button>
+    <button class="fs-btn fs-btn--primary is-active">눌림</button>
+    <button class="fs-btn fs-btn--primary" disabled>분석 중</button>
+    <button class="fs-btn fs-btn--secondary">대시보드로 가기</button>
+    <a class="fs-btn fs-btn--text" href="#">전체 보기 →</a>
+  </div>
+  <div class="row">
+    <button class="fs-btn fs-btn--primary fs-btn--lg">프로 구독하기</button>
+    <button class="fs-btn fs-btn--google fs-btn--lg"><span aria-hidden="true" style="font-weight:800">G</span>Google 계정으로 로그인</button>
+    <button class="fs-btn fs-btn--danger">내 데이터 전체 삭제</button>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css">
+<title>FinSight</title>
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:var(--canvas); color:var(--ink); font-family:var(--font-sans); overflow:hidden; }
+  .cover { position:relative; width:960px; height:288px; overflow:hidden; }
+  .art { position:absolute; top:0; left:480px; width:480px; height:288px; }
+  .art svg { display:block; width:480px; height:288px; }
+  .brand { fill:var(--primary); }
+  .tint { fill:var(--primary-soft); }
+  .mid { fill:var(--primary-muted); }
+  .gray { fill:var(--surface-strong); }
+  .paper { fill:var(--canvas); }
+  .words { position:absolute; left:var(--space-xl); bottom:var(--space-xl); max-width:440px; }
+  .name { margin:0; font-size:88px; line-height:.92; font-weight:800; letter-spacing:-2.5px; color:var(--ink); }
+  .name b { color:var(--primary); font-weight:800; }
+  .tag { margin:var(--space-sm) 0 0 2px; font-size:14px; line-height:20px; color:var(--body); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 288" width="480" height="288">
+<!--
+  blocks      primary 176×280 slab bled off the top (the one accent) · primary-soft 248×168 tint bled off the right · surface-strong 248×88 under it · primary-muted once as a month bar — ≈45% of 960×288
+  arrangement one tall green slab with a soft tint and a gray strip as satellites, bottoms on one line space-xl above the edge, space-lg gutters
+  pattern     horizontal pill bars, from "카테고리 차트는 가로 막대 목록 — 숫자가 먼저": six radius-pill bars of falling length (the CategoryBars component) on the tint, month bars cut into the slab in canvas
+  scales      sides in space-xs multiples; gutters space-lg; block corners radius-xl (24); bars 12 tall rx 6 (half); month bars rx radius-sm
+-->
+<rect class="brand" x="24" y="-24" width="176" height="280" rx="24"/>
+<rect class="paper" x="48" y="168" width="24" height="64" rx="8"/>
+<rect class="paper" x="84" y="144" width="24" height="88" rx="8"/>
+<rect class="paper" x="120" y="184" width="24" height="48" rx="8"/>
+<rect class="paper" x="156" y="120" width="24" height="112" rx="8"/>
+<rect class="tint" x="224" y="-24" width="280" height="168" rx="24"/>
+<rect class="brand" x="248" y="24" width="184" height="12" rx="6"/>
+<rect class="brand" x="248" y="48" width="136" height="12" rx="6"/>
+<rect class="brand" x="248" y="72" width="104" height="12" rx="6"/>
+<rect class="mid" x="248" y="96" width="72" height="12" rx="6"/>
+<rect class="gray" x="224" y="168" width="280" height="88" rx="24"/>
+<rect class="paper" x="248" y="196" width="152" height="12" rx="6"/>
+<rect class="paper" x="248" y="220" width="96" height="12" rx="6"/>
+</svg>
+</div>
+<div class="words">
+  <p class="name">Fin<b>Sight</b></p>
+  <p class="tag">카드 명세서를 올리면, 새는 돈이 보여요.</p>
+</div>
+</div>
+</body>
+</html>

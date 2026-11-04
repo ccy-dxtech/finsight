@@ -4,6 +4,8 @@
 ```
 src/
 ├── app/
+│   ├── layout.tsx                  # 루트 레이아웃: <html lang="ko">, Pretendard(pretendard 패키지), globals.css
+│   ├── globals.css                 # Tailwind @theme 디자인 토큰 (docs/design-system/tokens.css 값을 옮긴 단일 출처)
 │   ├── page.tsx                    # 랜딩
 │   ├── login/page.tsx              # Google 로그인
 │   ├── auth/callback/route.ts      # Supabase OAuth 콜백 (세션 교환 후 next 경로로 이동)
@@ -19,7 +21,7 @@ src/
 │       ├── portal/route.ts         # GET: Polar 고객 포털로 리다이렉트
 │       ├── webhooks/polar/route.ts # POST: Polar 웹훅 → profiles.plan 갱신
 │       └── data/route.ts           # DELETE: 내 거래·리포트 전체 삭제
-├── components/                     # UI 컴포넌트 (차트 포함, 외부 차트 라이브러리 없음)
+├── components/                     # UI 컴포넌트, 디자인 시스템과 같은 이름 (차트 포함, 외부 차트 라이브러리 없음)
 ├── types/                          # 공용 타입 (Transaction, Report, Plan 등)
 ├── lib/
 │   ├── statement/                  # 디코딩, 파싱, 마스킹, 정규화, 중복 키 (순수 함수)
@@ -37,6 +39,23 @@ supabase/
 
 ## 패턴
 - **컴포넌트**: Server Components가 기본이다. 업로드 폼, 삭제 확인처럼 상호작용이 필요한 곳만 Client Component로 만든다. 차트는 Server Component다.
+- **디자인 시스템**: 컴포넌트는 `docs/design-system/components/<이름>/`(README.md 명세 + preview.html 모양)을 기준으로 Tailwind 유틸리티로 만든다. 토큰은 `src/app/globals.css`의 `@theme` 한 곳에만 둔다. 공용 컴포넌트(`Button`, `Badge`, `Notice`)를 먼저 만들고 화면 컴포넌트가 이를 조합한다. 세부 규칙은 `docs/UI_GUIDE.md`.
+- **프레젠테이션 컴포넌트**: `src/components/`의 컴포넌트는 props만 받는 동기 함수로 만든다. 데이터 읽기(Supabase)는 `page.tsx`에서 하고 결과를 props로 넘긴다. async 컴포넌트는 아래 정적 렌더링 테스트를 할 수 없다.
+- **컴포넌트 테스트**: `Foo.tsx` 옆에 `Foo.test.tsx`를 둔다. Vitest에서 `react-dom/server`의 `renderToStaticMarkup`으로 HTML 문자열을 만들어 문구, aria 속성(`role="status"`, `aria-current` 등), 상태(비활성, 0회, 잠금 등)를 확인한다. Testing Library·jsdom은 쓰지 않고, 클릭·입력 같은 상호작용과 픽셀 모양은 테스트하지 않는다. Vitest 설정에서 `.tsx`를 React automatic JSX로 변환하게 한다.
+
+## 화면과 컴포넌트
+컴포넌트 이름은 `docs/design-system/components/`의 폴더 이름과 같다. 위에서 아래 순서로 놓는다.
+
+| 경로 | 컴포넌트 |
+|---|---|
+| `/` | `Hero` → `StepList` → `PricingTier` → 푸터 |
+| `/login` | 가운데 `Button`(Google, 큰 버튼) 하나 |
+| `/dashboard/*` 공통 | `AppHeader`(dashboard/layout.tsx) |
+| `/dashboard` | `UploadDropzone`(분석 중에는 그 자리에 `AnalyzingState`) → `UsageMeter` → `ReportListItem` 목록 |
+| `/dashboard/reports/[id]` | `StatSummary` → `CategoryBars` → `InsightList`(정기결제·이상 지출) → `SavingTip` |
+| `/dashboard/trends` | 프로: `MonthlyChart` + `ChangeTable` / 무료: `LockedPanel` |
+| `/dashboard/settings` | `SettingsRow` 목록(플랜, 구독 관리, 데이터 삭제, 로그아웃) |
+| 여러 화면 | `Button`, `Badge`, `Notice`(오류·결제 확인 중·결제 완료 안내) |
 - **서버 전용 모듈**: 외부 API와 비밀값을 쓰는 모듈(`services/`, service role 클라이언트)은 `import "server-only"`로 클라이언트 번들 유입을 막는다.
 - **순수 함수**: 파일 처리와 집계 로직은 `lib/`의 순수 함수로 만들고 단위 테스트로 검증한다. 라우트 핸들러는 이 함수들을 조합만 한다.
 - **숫자는 코드, 해석은 AI**: 합계·건수·증감률은 `lib/aggregate`가 계산한다. AI 리포트는 거래를 id로 참조하고, 그 id를 날짜·가맹점·금액으로 바꾸는 것은 코드가 한다.

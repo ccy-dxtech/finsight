@@ -1,0 +1,18 @@
+<!-- @dsCard group="Status" height=230 -->
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><style>
+body { margin: 0; background: var(--canvas); }
+.pad { padding: var(--space-lg); }
+.row { display: flex; gap: var(--space-sm); flex-wrap: wrap; align-items: center; }
+
+</style></head>
+<body>
+<div class="pad" style="display:grid;gap:12px;max-width:560px">
+  <div class="fs-notice"><span class="fs-notice__icon">i</span><div><strong>결제 확인 중이에요.</strong> 잠시 뒤 새로고침하면 프로로 바뀌어요.</div></div>
+  <div class="fs-notice fs-notice--success"><span class="fs-notice__icon">✓</span><div><strong>프로가 시작됐어요.</strong> 이번 달 30회까지 분석할 수 있어요.</div></div>
+  <div class="fs-notice fs-notice--error"><span class="fs-notice__icon">!</span><div><strong>날짜·가맹점·금액 열을 찾지 못했어요.</strong> 카드사에서 받은 원본 파일인지 확인해 주세요. 횟수는 차감되지 않았어요.</div></div>
+  <p class="fs-testnote">테스트 결제 환경이며 실제로 청구되지 않습니다</p>
+</div>
+</body>
+</html>

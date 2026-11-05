@@ -11,7 +11,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ko">
-      <body className="break-keep">{children}</body>
+      <body className="font-sans break-keep text-body bg-canvas text-body-md">
+        {children}
+      </body>
     </html>
   );
 }

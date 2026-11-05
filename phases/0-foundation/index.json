@@ -7,12 +7,15 @@
       "name": "project-setup",
       "status": "completed",
       "summary": "Next.js 16 App Router·TypeScript strict·Tailwind·ESLint 초기 설정, 공식 SheetJS 포함 의존성, Vitest 스모크 테스트와 환경 변수 예시 구성 및 AC 통과",
-      "started_at": "2026-11-05T21:48:50+0900"
+      "started_at": "2026-11-05T21:48:50+0900",
+      "completed_at": "2026-11-05T21:54:43+0900"
     },
     {
       "step": 1,
       "name": "design-tokens",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-11-05T21:55:03+0900",
+      "summary": "디자인 토큰을 Tailwind @theme로 이식하고 Pretendard·한국어 본문 기본 스타일 및 최소 홈 페이지를 확인, AC 통과"
     },
     {
       "step": 2,

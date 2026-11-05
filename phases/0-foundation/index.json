@@ -21,7 +21,9 @@
     {
       "step": 2,
       "name": "core-types",
-      "status": "pending"
+      "status": "completed",
+      "summary": "bigint 공용 거래·리포트·AI 응답 타입, 고정 카테고리, 플랜별 한도·환경 변수 모델 선택·KST 월 경계 구현 및 AC 통과",
+      "started_at": "2026-11-05T21:58:03+0900"
     },
     {
       "step": 3,

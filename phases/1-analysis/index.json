@@ -39,7 +39,8 @@
       "name": "analyze-api",
       "status": "completed",
       "summary": "분석 API의 인증·한도·파싱·중복·병렬 분류·리포트·원자적 저장 구현, bigint 정밀도 보존 및 신규 테스트 19개 포함 전체 181개·lint·build 통과",
-      "started_at": "2026-11-05T22:31:12+0900"
+      "started_at": "2026-11-05T22:31:12+0900",
+      "completed_at": "2026-11-05T22:37:03+0900"
     }
   ],
   "created_at": "2026-11-05T22:09:57+0900"

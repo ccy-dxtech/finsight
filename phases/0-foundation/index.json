@@ -1,0 +1,34 @@
+{
+  "project": "FinSight",
+  "phase": "0-foundation",
+  "steps": [
+    {
+      "step": 0,
+      "name": "project-setup",
+      "status": "completed",
+      "summary": "Next.js 16 App Router·TypeScript strict·Tailwind·ESLint 초기 설정, 공식 SheetJS 포함 의존성, Vitest 스모크 테스트와 환경 변수 예시 구성 및 AC 통과",
+      "started_at": "2026-11-05T21:48:50+0900"
+    },
+    {
+      "step": 1,
+      "name": "design-tokens",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "core-types",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "statement-lib",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "aggregate-lib",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-11-05T21:48:50+0900"
+}

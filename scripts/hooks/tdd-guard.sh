@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# TDD Guard Hook — Claude Code PreToolUse[Edit|Write|MultiEdit]
+# TDD Guard Hook — Codex/Claude Code PreToolUse[Edit|Write|MultiEdit]
 # 구현 파일(.ts/.tsx/.js/.jsx)을 만들거나 고칠 때 대응하는 테스트 파일이 없으면 차단한다.
 #
 # 원본:

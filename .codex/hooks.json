@@ -1,0 +1,44 @@
+{
+  "description": "FinSight 하네스 훅: 위험 명령 차단, TDD 가드, 턴 종료 시 lint/build/test 검증",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/scripts/hooks/dangerous-command-guard.sh\"",
+            "commandWindows": "powershell -NoProfile -Command \"& 'C:\\Program Files\\Git\\bin\\bash.exe' ((git rev-parse --show-toplevel) + '/scripts/hooks/dangerous-command-guard.sh')\"",
+            "timeout": 30,
+            "statusMessage": "위험 명령 검사 중"
+          }
+        ]
+      },
+      {
+        "matcher": "^(apply_patch|Edit|Write)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/scripts/hooks/tdd-guard.sh\"",
+            "commandWindows": "powershell -NoProfile -Command \"& 'C:\\Program Files\\Git\\bin\\bash.exe' ((git rev-parse --show-toplevel) + '/scripts/hooks/tdd-guard.sh')\"",
+            "timeout": 30,
+            "statusMessage": "TDD 가드 검사 중"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/scripts/hooks/verify-on-stop.sh\"",
+            "commandWindows": "powershell -NoProfile -Command \"& 'C:\\Program Files\\Git\\bin\\bash.exe' ((git rev-parse --show-toplevel) + '/scripts/hooks/verify-on-stop.sh')\"",
+            "timeout": 600,
+            "statusMessage": "lint · build · test 검증 중"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Dangerous Command Guard — Claude Code PreToolUse[Bash|PowerShell]
+# Dangerous Command Guard — Codex/Claude Code PreToolUse[Bash|PowerShell]
 # 되돌리기 어려운 명령을 실행 전에 차단한다.
 #
 # 원본: harness_framework 템플릿 .claude/settings.json의 인라인 훅

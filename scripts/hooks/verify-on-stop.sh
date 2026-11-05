@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Verify-on-Stop Hook — Claude Code Stop
+# Verify-on-Stop Hook — Codex/Claude Code Stop
 # 턴이 끝날 때 npm run lint → build → test 를 차례로 돌려 검증한다.
 #
 # 원본: harness_framework 템플릿 .claude/settings.json의 인라인 훅

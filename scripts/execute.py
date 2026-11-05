@@ -177,9 +177,9 @@ class StepExecutor:
 
     def _load_guardrails(self) -> str:
         sections = []
-        claude_md = ROOT / "CLAUDE.md"
-        if claude_md.exists():
-            sections.append(f"## 프로젝트 규칙 (CLAUDE.md)\n\n{claude_md.read_text(encoding='utf-8')}")
+        agents_md = ROOT / "AGENTS.md"
+        if agents_md.exists():
+            sections.append(f"## 프로젝트 규칙 (AGENTS.md)\n\n{agents_md.read_text(encoding='utf-8')}")
         docs_dir = ROOT / "docs"
         if docs_dir.is_dir():
             for doc in sorted(docs_dir.glob("*.md")):
@@ -225,9 +225,9 @@ class StepExecutor:
             f"   {commit_example}\n\n---\n\n"
         )
 
-    # --- Claude 호출 ---
+    # --- Codex 호출 ---
 
-    def _invoke_claude(self, step: dict, preamble: str) -> dict:
+    def _invoke_codex(self, step: dict, preamble: str) -> dict:
         step_num, step_name = step["step"], step["name"]
         step_file = self._phase_dir / f"step{step_num}.md"
 
@@ -238,16 +238,18 @@ class StepExecutor:
         prompt = preamble + step_file.read_text(encoding="utf-8")
         # 프롬프트는 stdin으로 넘긴다: Windows 명령줄은 32,767자까지라 문서 전체를 인자로 넣을 수 없다.
         # 인코딩은 UTF-8로 고정한다: Windows 기본 인코딩(cp949)으로는 한국어·기호가 깨진다.
-        # 실행 파일은 전체 경로로 찾는다: Windows의 npm 설치본(claude.cmd)은 이름만으로 실행되지 않는다.
-        claude_bin = shutil.which("claude") or "claude"
+        # 실행 파일은 전체 경로로 찾는다: Windows의 npm 설치본(codex.cmd)은 이름만으로 실행되지 않는다.
+        # `codex exec ... -` 는 프롬프트를 stdin에서 읽는다.
+        codex_bin = shutil.which("codex") or "codex"
         result = subprocess.run(
-            [claude_bin, "-p", "--dangerously-skip-permissions", "--output-format", "json"],
+            [codex_bin, "exec", "--dangerously-bypass-approvals-and-sandbox",
+             "--dangerously-bypass-hook-trust", "--json", "-"],
             input=prompt, cwd=self._root, capture_output=True,
             text=True, encoding="utf-8", errors="replace", timeout=1800,
         )
 
         if result.returncode != 0:
-            print(f"\n  WARN: Claude가 비정상 종료됨 (code {result.returncode})")
+            print(f"\n  WARN: Codex가 비정상 종료됨 (code {result.returncode})")
             if result.stderr:
                 print(f"  stderr: {result.stderr[:500]}")
 
@@ -312,7 +314,7 @@ class StepExecutor:
                 tag += f" [retry {attempt}/{self.MAX_RETRIES}]"
 
             with progress_indicator(tag) as pi:
-                self._invoke_claude(step, preamble)
+                self._invoke_codex(step, preamble)
                 elapsed = int(pi.elapsed)
 
             index = self._read_json(self._index_file)

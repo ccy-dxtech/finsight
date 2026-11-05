@@ -29,7 +29,9 @@
     {
       "step": 3,
       "name": "statement-lib",
-      "status": "pending"
+      "status": "completed",
+      "summary": "CSV·xls·xlsx 파싱, UTF-8/EUC-KR 디코딩, 숫자 마스킹, bigint 거래 정규화·행별 임시 ID·업로드 간 중복 필터 구현 및 AC 통과",
+      "started_at": "2026-11-05T22:00:47+0900"
     },
     {
       "step": 4,

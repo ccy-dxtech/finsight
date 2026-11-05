@@ -6,6 +6,7 @@ export type { Category } from "@/lib/categories";
 export type Plan = "free" | "pro";
 
 export interface Transaction {
+  id: number; // 요청 내 임시 ID: 파일의 행 번호(1부터 시작), DB ID와 무관
   occurredOn: string; // YYYY-MM-DD
   merchant: string;
   amount: bigint;

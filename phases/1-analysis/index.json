@@ -31,7 +31,8 @@
       "name": "claude-service",
       "status": "completed",
       "started_at": "2026-11-05T22:25:58+0900",
-      "summary": "서버 전용 Claude 서비스 3종과 구조화 출력 재검증·ai_failed 오류 변환, 플랜별 모델·리포트 스트리밍 구현; 모킹 테스트 26개 및 lint·build·전체 162개 테스트 통과"
+      "summary": "서버 전용 Claude 서비스 3종과 구조화 출력 재검증·ai_failed 오류 변환, 플랜별 모델·리포트 스트리밍 구현; 모킹 테스트 26개 및 lint·build·전체 162개 테스트 통과",
+      "completed_at": "2026-11-05T22:31:11+0900"
     },
     {
       "step": 4,

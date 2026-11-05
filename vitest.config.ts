@@ -11,7 +11,7 @@ export default defineConfig({
     jsx: { runtime: "automatic" },
   },
   test: {
-    include: ["src/**/*.test.{ts,tsx}"],
+    include: ["src/**/*.test.{ts,tsx}", "supabase/**/*.test.ts"],
     environment: "node",
   },
 });

@@ -2,10 +2,33 @@
   "project": "FinSight",
   "phase": "1-analysis",
   "steps": [
-    { "step": 0, "name": "supabase-schema", "status": "pending" },
-    { "step": 1, "name": "supabase-clients", "status": "pending" },
-    { "step": 2, "name": "auth-flow", "status": "pending" },
-    { "step": 3, "name": "claude-service", "status": "pending" },
-    { "step": 4, "name": "analyze-api", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "supabase-schema",
+      "status": "completed",
+      "summary": "4개 테이블·RLS·가입 트리거·commit_analysis RPC 마이그레이션과 SQL 정적 검증 테스트 12개 작성, lint·build·전체 테스트 통과",
+      "started_at": "2026-11-05T22:09:57+0900"
+    },
+    {
+      "step": 1,
+      "name": "supabase-clients",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "auth-flow",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "claude-service",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "analyze-api",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-11-05T22:09:57+0900"
 }

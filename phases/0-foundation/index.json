@@ -37,7 +37,9 @@
     {
       "step": 4,
       "name": "aggregate-lib",
-      "status": "pending"
+      "status": "completed",
+      "summary": "bigint 카테고리·요약·최신 12개월 합계·전월 대비 증감 순수 함수 및 경계 테스트 구현, lint·build·전체 76개 테스트 통과",
+      "started_at": "2026-11-05T22:05:40+0900"
     }
   ],
   "created_at": "2026-11-05T21:48:50+0900"

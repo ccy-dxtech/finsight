@@ -99,7 +99,7 @@ export async function classifyMerchants(merchants: string[]): Promise<{ merchant
 export async function writeReport(input: {
   plan: Plan;
   categoryTotals: ReportTotals["categoryTotals"];
-  transactions: { id: number; date: string; merchant: string; amount: number; category: Category }[];
+  transactions: { id: number; date: string; merchant: string; amount: bigint; category: Category }[];
 }): Promise<ReportDraft> {
   try {
     const client = new Anthropic();

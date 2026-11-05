@@ -20,7 +20,7 @@ const draft = {
 const input = {
   plan: "free" as const,
   categoryTotals: Object.fromEntries(CATEGORIES.map((category) => [category, 0n])) as Record<(typeof CATEGORIES)[number], bigint>,
-  transactions: [{ id: 1, date: "2026-10-01", merchant: "카페", amount: 4500, category: "카페·간식" as const }],
+  transactions: [{ id: 1, date: "2026-10-01", merchant: "카페", amount: 9007199254740993n, category: "카페·간식" as const }],
 };
 
 beforeEach(() => {
@@ -67,7 +67,7 @@ it("리포트는 스트리밍 최종 응답에서 거래 ID와 한국어 문장�
   expect(request).toMatchObject({ model: "test-free-model", max_tokens: 64000, output_config: { effort: "medium" } });
   expect(JSON.parse(request.messages[0].content)).toEqual({
     categoryTotals: Object.fromEntries(CATEGORIES.map((category) => [category, "0"])),
-    transactions: input.transactions,
+    transactions: [{ ...input.transactions[0], amount: "9007199254740993" }],
   });
   expect(request.system).toContain("금액을 계산해 쓰지 말고 거래 id로 참조하라");
   expect(request.system).toContain("한국어 해요체");

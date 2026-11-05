@@ -2,12 +2,43 @@
   "project": "FinSight",
   "phase": "2-app",
   "steps": [
-    { "step": 0, "name": "ui-primitives", "status": "pending" },
-    { "step": 1, "name": "ui-landing", "status": "pending" },
-    { "step": 2, "name": "ui-dashboard-home", "status": "pending" },
-    { "step": 3, "name": "ui-report", "status": "pending" },
-    { "step": 4, "name": "ui-trends-settings", "status": "pending" },
-    { "step": 5, "name": "billing-api", "status": "pending" },
-    { "step": 6, "name": "data-delete", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "ui-primitives",
+      "status": "completed",
+      "summary": "Button 변형·크기·링크·비활성 지원, Badge·Notice와 정적 렌더링 테스트 구현",
+      "started_at": "2026-11-05T22:39:32+0900"
+    },
+    {
+      "step": 1,
+      "name": "ui-landing",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "ui-dashboard-home",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "ui-report",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "ui-trends-settings",
+      "status": "pending"
+    },
+    {
+      "step": 5,
+      "name": "billing-api",
+      "status": "pending"
+    },
+    {
+      "step": 6,
+      "name": "data-delete",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-11-05T22:39:32+0900"
 }

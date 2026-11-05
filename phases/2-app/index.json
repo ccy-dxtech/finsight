@@ -7,7 +7,8 @@
       "name": "ui-primitives",
       "status": "completed",
       "summary": "Button 변형·크기·링크·비활성 지원, Badge·Notice와 정적 렌더링 테스트 구현",
-      "started_at": "2026-11-05T22:39:32+0900"
+      "started_at": "2026-11-05T22:39:32+0900",
+      "completed_at": "2026-11-05T22:43:46+0900"
     },
     {
       "step": 1,

@@ -11,6 +11,7 @@ export default defineConfig({
     jsx: { runtime: "automatic" },
   },
   test: {
+    server: { deps: { inline: ["@polar-sh/nextjs"] } },
     include: ["src/**/*.test.{ts,tsx}", "supabase/**/*.test.ts"],
     environment: "node",
   },

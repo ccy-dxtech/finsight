@@ -15,7 +15,8 @@
       "name": "supabase-clients",
       "status": "completed",
       "summary": "서버·브라우저·관리자 Supabase 클라이언트와 쿠키·캐시 헤더를 보존하는 세션 갱신 헬퍼, 테스트 9개 작성 및 lint·build·전체 97개 테스트·키 격리 검사 통과",
-      "started_at": "2026-11-05T22:12:55+0900"
+      "started_at": "2026-11-05T22:12:55+0900",
+      "completed_at": "2026-11-05T22:16:28+0900"
     },
     {
       "step": 2,

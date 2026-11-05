@@ -47,7 +47,8 @@
       "name": "billing-api",
       "status": "completed",
       "summary": "세션 기반 Polar sandbox 체크아웃·고객 포털, 서명 검증 웹훅의 플랜 갱신과 모킹 테스트 구현",
-      "started_at": "2026-11-05T23:07:01+0900"
+      "started_at": "2026-11-05T23:07:01+0900",
+      "completed_at": "2026-11-05T23:12:36+0900"
     },
     {
       "step": 6,

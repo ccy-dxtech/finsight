@@ -12,7 +12,8 @@
     },
     {
       "dir": "2-app",
-      "status": "pending"
+      "status": "completed",
+      "completed_at": "2026-11-05T23:16:16+0900"
     }
   ]
 }

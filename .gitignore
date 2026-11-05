@@ -8,3 +8,7 @@ tsconfig.tsbuildinfo
 # phase execution outputs
 phases/**/phase*-output.json
 phases/**/step*-output.json
+
+# Python cache / shell crash dumps
+__pycache__/
+*.stackdump

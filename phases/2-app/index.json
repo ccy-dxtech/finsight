@@ -29,7 +29,9 @@
     {
       "step": 3,
       "name": "ui-report",
-      "status": "pending"
+      "status": "completed",
+      "summary": "리포트 요약·카테고리 가로 막대·거래 인사이트·절약 제안과 RLS 상세 조회, bigint 복원·404 처리 및 정적 렌더링 테스트 구현",
+      "started_at": "2026-11-05T22:54:18+0900"
     },
     {
       "step": 4,

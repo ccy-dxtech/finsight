@@ -15,7 +15,8 @@
       "name": "design-tokens",
       "status": "completed",
       "started_at": "2026-11-05T21:55:03+0900",
-      "summary": "디자인 토큰을 Tailwind @theme로 이식하고 Pretendard·한국어 본문 기본 스타일 및 최소 홈 페이지를 확인, AC 통과"
+      "summary": "디자인 토큰을 Tailwind @theme로 이식하고 Pretendard·한국어 본문 기본 스타일 및 최소 홈 페이지를 확인, AC 통과",
+      "completed_at": "2026-11-05T21:58:02+0900"
     },
     {
       "step": 2,

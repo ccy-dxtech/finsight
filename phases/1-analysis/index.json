@@ -21,7 +21,9 @@
     {
       "step": 2,
       "name": "auth-flow",
-      "status": "pending"
+      "status": "completed",
+      "summary": "안전한 next 검증, Next.js 16 proxy·OAuth 콜백·Google 로그인·대시보드 이중 보호와 최소 Button 구현, 신규 39개 포함 전체 136개 테스트·lint·build·클라이언트 비밀값 격리 검사 통과",
+      "started_at": "2026-11-05T22:16:29+0900"
     },
     {
       "step": 3,

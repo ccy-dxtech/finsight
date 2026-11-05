@@ -30,7 +30,7 @@ export function DeleteDataButton() {
   return (
     <div className="grid gap-3">
       <Button variant="danger" size="md" aria-haspopup="dialog" disabled={pending} onClick={remove}>{pending ? "삭제 중" : "전체 삭제"}</Button>
-      {result === "error" && <Notice variant="error"><strong>데이터를 삭제하지 못했어요.</strong> 다시 시도해 주세요.</Notice>}
+      {result === "error" && <Notice variant="error"><strong>데이터를 삭제하지 못했어요.</strong> 다시 시도해 주세요. 횟수는 차감되지 않았어요.</Notice>}
       {result === "success" && <Notice variant="success">거래와 리포트를 모두 삭제했어요.</Notice>}
     </div>
   );

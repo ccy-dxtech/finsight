@@ -1,0 +1,11 @@
+{
+  "project": "FinSight",
+  "phase": "1-analysis",
+  "steps": [
+    { "step": 0, "name": "supabase-schema", "status": "pending" },
+    { "step": 1, "name": "supabase-clients", "status": "pending" },
+    { "step": 2, "name": "auth-flow", "status": "pending" },
+    { "step": 3, "name": "claude-service", "status": "pending" },
+    { "step": 4, "name": "analyze-api", "status": "pending" }
+  ]
+}

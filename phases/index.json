@@ -1,0 +1,7 @@
+{
+  "phases": [
+    { "dir": "0-foundation", "status": "pending" },
+    { "dir": "1-analysis", "status": "pending" },
+    { "dir": "2-app", "status": "pending" }
+  ]
+}

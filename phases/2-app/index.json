@@ -1,0 +1,13 @@
+{
+  "project": "FinSight",
+  "phase": "2-app",
+  "steps": [
+    { "step": 0, "name": "ui-primitives", "status": "pending" },
+    { "step": 1, "name": "ui-landing", "status": "pending" },
+    { "step": 2, "name": "ui-dashboard-home", "status": "pending" },
+    { "step": 3, "name": "ui-report", "status": "pending" },
+    { "step": 4, "name": "ui-trends-settings", "status": "pending" },
+    { "step": 5, "name": "billing-api", "status": "pending" },
+    { "step": 6, "name": "data-delete", "status": "pending" }
+  ]
+}

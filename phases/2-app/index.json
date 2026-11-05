@@ -39,7 +39,8 @@
       "name": "ui-trends-settings",
       "status": "completed",
       "summary": "월별 가로 막대·카테고리 증감·무료 잠금과 프로 전용 RLS 집계, 설정·삭제 확인·로그아웃 및 테스트 구현",
-      "started_at": "2026-11-05T22:59:55+0900"
+      "started_at": "2026-11-05T22:59:55+0900",
+      "completed_at": "2026-11-05T23:06:59+0900"
     },
     {
       "step": 5,

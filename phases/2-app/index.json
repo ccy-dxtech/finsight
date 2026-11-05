@@ -15,7 +15,8 @@
       "name": "ui-landing",
       "status": "completed",
       "summary": "Hero·StepList·PricingTier와 세션 기반 랜딩 페이지, 요금제·테스트 결제 안내 및 정적 렌더링 테스트 구현",
-      "started_at": "2026-11-05T22:43:47+0900"
+      "started_at": "2026-11-05T22:43:47+0900",
+      "completed_at": "2026-11-05T22:47:00+0900"
     },
     {
       "step": 2,

@@ -29,7 +29,9 @@
     {
       "step": 3,
       "name": "claude-service",
-      "status": "pending"
+      "status": "blocked",
+      "blocked_reason": "필수 claude-api 스킬이 현재 세션과 로컬 스킬 경로에 없어 SDK 구조화 출력·effort·스트리밍·모델 ID 확인 선행 조건을 수행할 수 없음. 스킬 설치 또는 경로 제공 필요.",
+      "started_at": "2026-11-05T22:22:29+0900"
     },
     {
       "step": 4,

@@ -55,7 +55,8 @@
       "name": "data-delete",
       "status": "completed",
       "summary": "사용자 세션·RLS 기반 거래·리포트 전체 삭제 API, usage·profiles 보존 및 삭제 상태·오류 안내 테스트 구현; lint·build·전체 278개 테스트·TSX 색상·환경 변수 일치 검사 통과; 수동 작업: Supabase 마이그레이션 적용·Google OAuth 설정, Polar sandbox 상품 생성·웹훅 URL 등록, .env 채우기",
-      "started_at": "2026-11-05T23:12:38+0900"
+      "started_at": "2026-11-05T23:12:38+0900",
+      "completed_at": "2026-11-05T23:16:15+0900"
     }
   ],
   "created_at": "2026-11-05T22:39:32+0900"

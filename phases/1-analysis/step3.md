@@ -11,7 +11,37 @@
 - `/docs/UI_GUIDE.md` ("한국어 우선" 중 AI 문장 규칙)
 - 이전 step의 `src/types/`, `src/lib/categories.ts`, `src/lib/plan.ts`
 
-**먼저 `claude-api` 스킬을 호출**해 현재 SDK의 구조화 출력(`output_config.format`, `client.messages.parse()`, `zodOutputFormat`), effort, 스트리밍(`finalMessage()`) 사용법과 모델 ID(`claude-haiku-5-5`, `claude-sonnet-5-5`, `claude-opus-5-5`)를 확인한 뒤 작성하라. 기억에 의존하지 마라.
+### SDK 사용법 (설치된 `@anthropic-ai/sdk` 1.5.0, `zod` 4.6.7 기준으로 확인됨)
+
+기억에 의존하지 말고 아래 내용을 따르라. 의심스러우면 `node_modules/@anthropic-ai/sdk/resources/messages/messages.d.ts`, `lib/MessageStream.d.ts`, `lib/parser.js`, `helpers/zod.d.ts`를 직접 확인하라.
+
+```ts
+import Anthropic from "@anthropic-ai/sdk";
+import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
+
+const client = new Anthropic(); // ANTHROPIC_API_KEY를 환경 변수에서 읽는다
+
+// 비스트리밍 (mapColumns, classifyMerchants): max_tokens 16000
+const res = await client.messages.parse({
+  model, max_tokens: 16000, system, messages,
+  output_config: { format: zodOutputFormat(Schema), effort: "low" },
+});
+res.parsed_output; // z.infer<typeof Schema> | null
+
+// 스트리밍 (writeReport): stream()도 output_config.format을 받고, finalMessage()가 ParsedMessage를 돌려준다
+const stream = client.messages.stream({
+  model, max_tokens: 64000, system, messages,
+  output_config: { format: zodOutputFormat(ReportSchema), effort: "medium" },
+});
+const msg = await stream.finalMessage(); // msg.parsed_output, msg.stop_reason
+```
+
+- **파싱 동작**(`lib/parser.js`, `helpers/zod.js`): JSON 파싱이나 zod 검증에 실패하면 SDK가 `AnthropicError`를 던진다. 텍스트 블록이 없으면 `parsed_output`은 `null`이다. 출력이 잘린 경우(`max_tokens`)에는 보통 파싱 단계에서 예외가 난다.
+- **실패 판정**: 호출과 `finalMessage()`에서 나온 예외(SDK 재시도 2회 후의 API 오류 포함), `stop_reason`이 `"refusal"`이나 `"max_tokens"`, `parsed_output === null`이면 모두 `AiFailedError`로 바꾼다. `stop_reason`은 `parsed_output`보다 먼저 확인한다.
+- **thinking**: 세 모델(`claude-haiku-5-5`, `claude-sonnet-5-5`, `claude-opus-5-5`) 모두 `thinking` 파라미터를 생략한다. `{ type: "disabled" }`나 `budget_tokens`는 이 모델들에서 400 오류가 난다. 깊이는 `output_config.effort`로만 조절한다. Opus 5.5와 Haiku 5.5는 effort 기본값이 `medium`이므로 반드시 명시한다.
+- **보내지 않는 파라미터**: `temperature`, `top_p`, `top_k`는 보내지 않는다(현재 API 버전에서 400). assistant prefill(마지막 메시지를 assistant로 두기)도 400이므로 쓰지 않는다. 폐기된 `output_format` 대신 `output_config.format`을 쓴다.
+- **모델 ID**: 하드코딩하지 말고 `src/lib/plan.ts`의 `getFastModel()`, `getReportModel(plan)`으로 받는다(각각 `claude-haiku-5-5` / `claude-sonnet-5-5` / `claude-opus-5-5`가 env로 주입된다).
+- **테스트 모킹**: `Anthropic` 클라이언트를 주입 가능하게 하거나 `vi.mock("@anthropic-ai/sdk")`로 `messages.parse`, `messages.stream().finalMessage()`를 모킹한다. 실제 네트워크 호출은 하지 않는다.
 
 ## 작업
 

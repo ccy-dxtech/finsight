@@ -29,9 +29,9 @@
     {
       "step": 3,
       "name": "claude-service",
-      "status": "blocked",
-      "blocked_reason": "필수 claude-api 스킬이 현재 세션과 로컬 스킬 경로에 없어 SDK 구조화 출력·effort·스트리밍·모델 ID 확인 선행 조건을 수행할 수 없음. 스킬 설치 또는 경로 제공 필요.",
-      "started_at": "2026-11-05T22:22:29+0900"
+      "status": "completed",
+      "started_at": "2026-11-05T22:25:58+0900",
+      "summary": "서버 전용 Claude 서비스 3종과 구조화 출력 재검증·ai_failed 오류 변환, 플랜별 모델·리포트 스트리밍 구현; 모킹 테스트 26개 및 lint·build·전체 162개 테스트 통과"
     },
     {
       "step": 4,

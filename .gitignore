@@ -13,3 +13,10 @@ phases/**/step*-output.json
 # Python cache / shell crash dumps
 __pycache__/
 *.stackdump
+
+# Playwright E2E outputs
+test-results/
+playwright-report/
+
+# Claude Code worktrees
+.claude/worktrees/

@@ -8,6 +8,7 @@
 | 토큰(색, 글자, 간격, 모서리, 그림자)과 쓰임 | `docs/design-system/tokens.json` (CSS 변수: `tokens.css`) |
 | 컴포넌트 명세 | `docs/design-system/components/<이름>/README.md` |
 | 컴포넌트 모양 예시 | `docs/design-system/components/<이름>/preview.html` (브라우저로 열기, 스타일은 `components/bundle.css`) |
+| 사용자 여정, 단계별 다음 행동, 상태별 화면, 용어 | `docs/UX_GUIDE.md` |
 
 ## 디자인 원칙
 1. **숫자가 주인공이다.** 화면에서 가장 먼저 읽혀야 하는 것은 금액이다. 장식은 숫자를 가리지 않는다.

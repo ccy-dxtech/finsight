@@ -4,7 +4,6 @@ import { Checkout } from "@polar-sh/nextjs";
 import { GET } from "./route";
 
 const { getSessionPlan, checkout } = vi.hoisted(() => ({ getSessionPlan: vi.fn(), checkout: vi.fn() }));
-vi.mock("server-only", () => ({}));
 vi.mock("@/lib/supabase/session-plan", () => ({ getSessionPlan }));
 vi.mock("@polar-sh/nextjs", () => ({ Checkout: vi.fn(() => checkout) }));
 

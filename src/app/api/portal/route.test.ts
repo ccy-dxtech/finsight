@@ -4,7 +4,6 @@ import { CustomerPortal } from "@polar-sh/nextjs";
 import { GET } from "./route";
 
 const { getUser, portal } = vi.hoisted(() => ({ getUser: vi.fn(), portal: vi.fn() }));
-vi.mock("server-only", () => ({}));
 vi.mock("@/lib/supabase/server", () => ({ createServerClient: async () => ({ auth: { getUser } }) }));
 vi.mock("@polar-sh/nextjs", () => ({ CustomerPortal: vi.fn(() => portal) }));
 beforeEach(() => {

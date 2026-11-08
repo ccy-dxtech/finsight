@@ -4,7 +4,6 @@ import { getSessionPlan } from "./session-plan";
 const { getUser, from, select, eq, maybeSingle } = vi.hoisted(() => ({
   getUser: vi.fn(), from: vi.fn(), select: vi.fn(), eq: vi.fn(), maybeSingle: vi.fn(),
 }));
-vi.mock("server-only", () => ({}));
 vi.mock("./server", () => ({ createServerClient: async () => ({ auth: { getUser }, from }) }));
 
 beforeEach(() => {

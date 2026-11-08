@@ -39,6 +39,10 @@
   --text-display-lg--line-height: 1.3;
   --text-display-lg--font-weight: 700;
   --text-display-lg--letter-spacing: -1px;
+  --text-display-sm: 32px;
+  --text-display-sm--line-height: 1.3;
+  --text-display-sm--font-weight: 700;
+  --text-display-sm--letter-spacing: -0.6px;
   --text-display-md: 36px;
   --text-display-md--line-height: 1.35;
   --text-display-md--font-weight: 700;

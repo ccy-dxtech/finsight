@@ -55,7 +55,7 @@ supabase/
 
 | 경로 | 컴포넌트 |
 |---|---|
-| `/` | `Hero` → `StepList` → `PricingTier` → 푸터 |
+| `/` | 헤더(로고 + 보조 `Button`) → `Hero` → `StepList`(`surface-soft` 띠) → `PricingTier`(`#pricing`) → 푸터 |
 | `/login` | 가운데 `Button`(Google, 큰 버튼) 하나 |
 | `/dashboard/*` 공통 | `AppHeader`(dashboard/layout.tsx) |
 | `/dashboard` | `UploadDropzone`(분석 중에는 그 자리에 `AnalyzingState`, 이번 달 횟수를 다 쓰면 그 자리에 `LockedPanel` 소진 카드) → `UsageMeter` → `ReportListItem` 목록 |

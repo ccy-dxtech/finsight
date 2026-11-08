@@ -4,7 +4,6 @@ import { webhooks } from "@polar-sh/sdk/2026-10";
 import { POST } from "./route";
 
 const { validateEvent, from, update, eq, admin } = vi.hoisted(() => ({ validateEvent: vi.fn(), from: vi.fn(), update: vi.fn(), eq: vi.fn(), admin: vi.fn() }));
-vi.mock("server-only", () => ({}));
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: admin }));
 vi.mock("@polar-sh/sdk/2026-10", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@polar-sh/sdk/2026-10")>();

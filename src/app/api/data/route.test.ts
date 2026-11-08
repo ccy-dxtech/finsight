@@ -4,7 +4,6 @@ import { DELETE } from "./route";
 const { getUser, from, remove, eq } = vi.hoisted(() => ({
   getUser: vi.fn(), from: vi.fn(), remove: vi.fn(), eq: vi.fn(),
 }));
-vi.mock("server-only", () => ({}));
 vi.mock("@/lib/supabase/server", () => ({
   createServerClient: async () => ({ auth: { getUser }, from }),
 }));

@@ -3,7 +3,6 @@ import { CATEGORIES } from "@/lib/categories";
 import { AiFailedError, classifyMerchants, mapColumns, writeReport } from "./claude";
 
 const sdk = vi.hoisted(() => ({ parse: vi.fn(), stream: vi.fn(), finalMessage: vi.fn() }));
-vi.mock("server-only", () => ({}));
 vi.mock("@anthropic-ai/sdk", () => ({
   default: vi.fn(function () {
     return { messages: { parse: sdk.parse, stream: sdk.stream } };

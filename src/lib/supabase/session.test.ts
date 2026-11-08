@@ -5,7 +5,6 @@ import { NextRequest } from "next/server";
 import { updateSession } from "./session";
 
 const state = vi.hoisted(() => ({ adapter: undefined as CookieMethodsServer | undefined, getUser: vi.fn() }));
-vi.mock("server-only", () => ({}));
 vi.mock("@supabase/ssr", () => ({
   createServerClient: vi.fn((_url, _key, options) => {
     state.adapter = options.cookies;

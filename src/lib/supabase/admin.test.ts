@@ -3,7 +3,6 @@ import { readFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 import { createAdminClient } from "./admin";
 
-vi.mock("server-only", () => ({}));
 vi.mock("@supabase/supabase-js", () => ({ createClient: vi.fn() }));
 
 beforeEach(() => {

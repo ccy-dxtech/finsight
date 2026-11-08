@@ -24,8 +24,8 @@ export default async function Home() {
           </div>
         </section>
       </main>
-      <footer className="bg-surface-soft px-8 py-12 text-caption text-muted">
-        <div className="mx-auto max-w-[1200px]">FinSight</div>
+      <footer className="bg-surface-soft py-12 text-caption text-muted">
+        <div className="mx-auto max-w-[1200px] px-8">FinSight</div>
       </footer>
     </>
   );

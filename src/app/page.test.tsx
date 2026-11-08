@@ -22,6 +22,15 @@ it("비로그인 랜딩에 히어로, 사용 방법, 요금제, 푸터를 순서
   expect(html).not.toMatch(/Get started|Upgrade|Powered by AI|FAQ/);
 });
 
+it("푸터 내용은 본문과 같은 최대 너비·좌우 여백에서 시작한다", async () => {
+  getUser.mockResolvedValue({ data: { user: null } });
+  const html = renderToStaticMarkup(await Home());
+  const mainClass = html.match(/<main class="([^"]+)"/)?.[1];
+  const [, footerClass, footerInnerClass] = html.match(/<footer class="([^"]+)"><div class="([^"]+)"/) ?? [];
+  expect(footerInnerClass).toBe(mainClass);
+  expect(footerClass).not.toMatch(/(^|\s)px-/);
+});
+
 it("인증된 사용자는 히어로에서 대시보드로 이동한다", async () => {
   getUser.mockResolvedValue({ data: { user: { id: "user" } } });
   const html = renderToStaticMarkup(await Home());

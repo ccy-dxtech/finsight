@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { GoogleLoginButton } from "@/components/GoogleLoginButton";
 import { safeNextPath } from "@/lib/auth/safe-next";
@@ -11,9 +12,14 @@ export default async function LoginPage({ searchParams }: {
   const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (user) redirect(next);
+  const message = next === "/api/checkout" ? "로그인하면 프로 구독 결제로 이어져요" : "Google 계정으로 바로 시작해요";
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-8 break-keep">
+    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-8 text-center break-keep">
+      <div className="flex flex-col items-center gap-3">
+        <Link href="/" className="text-title-md font-extrabold text-ink">Fin<b className="text-primary">Sight</b></Link>
+        <p className="text-body-lg text-body">{message}</p>
+      </div>
       <GoogleLoginButton next={next} />
       {params.error === "auth_failed" && (
         <p role="alert" className="text-body-sm text-body">로그인하지 못했어요. 다시 시도해 주세요.</p>

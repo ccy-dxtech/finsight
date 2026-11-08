@@ -3,6 +3,7 @@ import { getKstMonthStart, getMonthlyLimit } from "@/lib/plan";
 import { CATEGORIES, type Category } from "@/lib/categories";
 import { parseStatement, maskTopRows, normalizeRows, dedupeKey, pickNewTransactions, StatementError } from "@/lib/statement";
 import { summarize, sumByCategory } from "@/lib/aggregate";
+import { checkUploadFile } from "@/lib/upload";
 import { mapColumns, classifyMerchants, writeReport } from "@/services/claude";
 import type { ReportInsights, Transaction } from "@/types";
 
@@ -12,7 +13,7 @@ export const maxDuration = 300;
 const messages = {
   unauthorized: ["로그인이 필요해요.", "Google 계정으로 다시 로그인해 주세요."],
   unsupported_file: ["지원하지 않는 파일이에요.", "CSV, xls, xlsx 파일 하나를 올려 주세요. 암호가 걸린 엑셀은 지원하지 않아요."],
-  file_too_large: ["파일이 5MB를 넘어요.", "5MB 이하의 파일을 올려 주세요."],
+  file_too_large: ["파일이 4MB를 넘어요.", "4MB 이하의 파일을 올려 주세요."],
   too_many_rows: ["거래가 3,000건을 넘어요.", "기간을 나누어 파일을 올려 주세요."],
   columns_not_found: ["날짜·가맹점·금액 열을 찾지 못했어요.", "카드사에서 받은 원본 파일인지 확인해 주세요."],
   no_transactions: ["읽을 수 있는 거래가 없어요.", "날짜·가맹점·원화 금액이 있는 파일인지 확인해 주세요."],
@@ -40,10 +41,9 @@ export async function POST(request: Request) {
     }
     const file = form.get("file");
     const files = [...form.values()].filter((entry) => entry instanceof File);
-    if (!(file instanceof File) || files.length !== 1 || !/\.(csv|xls|xlsx)$/i.test(file.name)) {
-      return failure("unsupported_file");
-    }
-    if (file.size > 5 * 1024 * 1024) return failure("file_too_large");
+    if (!(file instanceof File) || files.length !== 1) return failure("unsupported_file");
+    const fileError = checkUploadFile(file);
+    if (fileError) return failure(fileError);
 
     const month = getKstMonthStart(new Date());
     const { data: profile, error: profileError } = await supabase.from("profiles")

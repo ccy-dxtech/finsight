@@ -88,7 +88,7 @@ it("로그인이 없으면 401이며 AI·DB 쓰기를 하지 않는다", async (
 it.each(["unsupported_file", "file_too_large", "columns_not_found", "too_many_rows", "no_transactions", "already_analyzed", "quota_exceeded", "ai_failed"])("%s 오류에서는 저장·차감하지 않는다", async (code) => {
   let content = csv; let name = "카드.csv";
   if (code === "unsupported_file") name = "카드.pdf";
-  if (code === "file_too_large") content = "a".repeat(5 * 1024 * 1024 + 1);
+  if (code === "file_too_large") content = "a".repeat(4 * 1024 * 1024 + 1);
   if (code === "columns_not_found") vi.mocked(mapColumns).mockResolvedValue(null);
   if (code === "too_many_rows") content = "날짜,가맹점,금액\n" + "20261003,가게,1\n".repeat(3001);
   if (code === "no_transactions") content = "날짜,가맹점,금액";

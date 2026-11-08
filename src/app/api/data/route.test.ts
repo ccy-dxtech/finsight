@@ -41,7 +41,8 @@ it.each(["transactions", "reports"])("%s 삭제 실패 시 한국어 오류를 �
   const response = await DELETE();
   expect(response.status).toBe(500);
   const body = await response.json();
-  expect(body.message).toContain("다시 시도해 주세요");
+  // 거래만 지워지고 리포트 삭제가 실패할 수 있으므로 "하나도 안 지워졌다"고 말하지 않는다.
+  expect(body.message).toBe("**데이터를 모두 지우지 못했어요.** 일부만 지워졌을 수 있어요. 다시 시도해 주세요.");
   expect(body.message).not.toContain("private database detail");
   expect(from.mock.calls).toEqual(table === "transactions" ? [["transactions"]] : [["transactions"], ["reports"]]);
 });

@@ -1,21 +1,22 @@
 import "server-only";
 import { Checkout } from "@polar-sh/nextjs";
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase/server";
+import { getSessionPlan } from "@/lib/supabase/session-plan";
 
 export async function GET(request: NextRequest) {
-  const supabase = await createServerClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) {
+  const session = await getSessionPlan();
+  if (!session) {
     const login = new URL("/login", request.url);
     login.searchParams.set("next", "/api/checkout");
     return NextResponse.redirect(login);
   }
+  // 같은 고객에게 구독이 둘이면 하나만 revoked돼도 웹훅이 free로 바꾸므로 두 번째 결제를 막는다.
+  if (session.plan === "pro") return NextResponse.redirect(new URL("/dashboard/settings", request.url));
 
   // 어댑터가 읽는 쿼리는 서버 값으로만 새로 만든다.
   const url = new URL("/api/checkout", request.url);
   url.searchParams.set("products", process.env.POLAR_PRO_PRODUCT_ID!);
-  url.searchParams.set("external_customer_id", user.id);
+  url.searchParams.set("external_customer_id", session.userId);
   return Checkout({
     accessToken: process.env.POLAR_ACCESS_TOKEN!,
     environment: "sandbox",

@@ -1,5 +1,5 @@
 import { CircleAlert, Repeat } from "lucide-react";
-import { formatAmount, formatDate } from "@/lib/format";
+import { formatDate, formatNumber } from "@/lib/format";
 import type { ReportInsights } from "@/types";
 
 export function InsightList({ recurring, anomalies }: Pick<ReportInsights, "recurring" | "anomalies">) {
@@ -17,7 +17,7 @@ export function InsightList({ recurring, anomalies }: Pick<ReportInsights, "recu
             <p className="text-number-md text-ink">{observation}</p>
             <ul>{transactions.map((transaction, transactionIndex) => <li key={transactionIndex} className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
               <span className="min-w-0 flex-1 wrap-anywhere text-body-sm text-muted"><span className="tabular-nums">{formatDate(transaction.occurredOn)}</span> · {transaction.merchant}</span>
-              <span className="ml-auto text-right text-number-md text-ink tabular-nums">{formatAmount(transaction.amount).slice(0, -1)}<span className="text-caption">원</span></span>
+              <span className="ml-auto text-right text-number-md text-ink tabular-nums">{formatNumber(transaction.amount)}<span className="text-caption">원</span></span>
             </li>)}</ul>
           </div>
         </li>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Transaction } from "@/types";
-import { categoryChanges, monthlyTotals } from "./monthly";
+import { categoryChanges, latestMonthChanges, monthlyTotals } from "./monthly";
 
 const txn = (occurredOn: string, amount: bigint, category?: Transaction["category"]): Transaction => ({
   id: 1, occurredOn, merchant: "가게", amount, category,
@@ -57,6 +57,38 @@ describe("categoryChanges", () => {
   it("빈 입력이나 해당 월 거래가 없으면 빈 목록이다", () => {
     expect(categoryChanges([], "2026-10", "2026-09")).toEqual([]);
     expect(categoryChanges([txn("2026-08-01", 1n)], "2026-10", "2026-09")).toEqual([]);
+  });
+});
+
+describe("latestMonthChanges", () => {
+  it("오늘 날짜가 아니라 거래가 있는 가장 최근 달과 그 전달을 비교한다", () => {
+    const txns = [
+      txn("2026-08-15", 999n, "교육"), txn("2026-09-03", 100n, "식비"),
+      txn("2026-10-02", 44300n, "식비"), txn("2026-10-20", 100n, "식비"), txn("2026-10-05", 30n, "교통"),
+    ];
+    expect(latestMonthChanges(txns)).toEqual({
+      currentMonth: "2026-10", previousMonth: "2026-09",
+      rows: [
+        { category: "식비", last: 100n, current: 44400n, diff: 44300n },
+        { category: "교통", last: 0n, current: 30n, diff: 30n },
+      ],
+    });
+  });
+
+  it("1월의 전달은 지난해 12월이다", () => {
+    expect(latestMonthChanges([txn("2026-12-31", 10n, "식비"), txn("2027-01-01", 15n, "식비")])).toEqual({
+      currentMonth: "2027-01", previousMonth: "2026-12",
+      rows: [{ category: "식비", last: 10n, current: 15n, diff: 5n }],
+    });
+  });
+
+  it("전달 거래가 없으면 0원과 비교한 증가로 보이지 않게 빈 목록을 준다", () => {
+    expect(latestMonthChanges([txn("2026-10-02", 100n, "식비"), txn("2026-08-02", 50n, "식비")]))
+      .toEqual({ currentMonth: "2026-10", previousMonth: "2026-09", rows: [] });
+  });
+
+  it("거래가 없으면 null이다", () => {
+    expect(latestMonthChanges([])).toBeNull();
   });
 
   it("미분류·상계된 카테고리와 큰 정수 증감을 유지한다", () => {

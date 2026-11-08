@@ -3,27 +3,28 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Upload } from "lucide-react";
+import { checkUploadFile } from "@/lib/upload";
 import { AnalyzingState } from "./AnalyzingState";
-import { Button } from "./Button";
 import { Notice } from "./Notice";
 
-export function UploadDropzone({ remaining }: { remaining: number }) {
+// 이번 달 횟수를 다 쓰면 대시보드가 이 영역 대신 LockedPanel 소진 카드를 보여준다.
+export function UploadDropzone() {
   const router = useRouter();
   const [analyzing, setAnalyzing] = useState(false);
   const [over, setOver] = useState(false);
   const [error, setError] = useState("");
-  const disabled = remaining <= 0;
 
   async function analyze(files: FileList | null) {
-    if (disabled || analyzing || !files?.length) return;
+    if (analyzing || !files?.length) return;
     setOver(false);
     setError("");
-    if (files.length !== 1 || !/\.(csv|xls|xlsx)$/i.test(files[0].name)) {
+    const fileError = files.length === 1 ? checkUploadFile(files[0]) : "unsupported_file";
+    if (fileError === "unsupported_file") {
       setError("**지원하지 않는 파일이에요.** CSV, xls, xlsx 파일 하나를 올려 주세요. 횟수는 차감되지 않았어요.");
       return;
     }
-    if (files[0].size > 5 * 1024 * 1024) {
-      setError("**파일이 5MB를 넘어요.** 5MB 이하의 파일을 올려 주세요. 횟수는 차감되지 않았어요.");
+    if (fileError === "file_too_large") {
+      setError("**파일이 4MB를 넘어요.** 4MB 이하의 파일을 올려 주세요. 횟수는 차감되지 않았어요.");
       return;
     }
     const form = new FormData();
@@ -49,17 +50,16 @@ export function UploadDropzone({ remaining }: { remaining: number }) {
   return (
     <div className="grid gap-4 break-keep">
       <label
-        className={`flex flex-col items-center gap-3 rounded-xl border-2 border-dashed px-6 py-12 text-center focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus ${disabled ? "cursor-not-allowed border-border-strong bg-surface-soft" : over ? "cursor-pointer border-primary bg-primary-soft" : "cursor-pointer border-border-strong bg-canvas hover:border-primary hover:bg-primary-soft"}`}
-        onDragOver={(event) => { event.preventDefault(); if (!disabled) setOver(true); }}
+        className={`flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed px-6 py-12 text-center focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus ${over ? "border-primary bg-primary-soft" : "border-border-strong bg-canvas hover:border-primary hover:bg-primary-soft"}`}
+        onDragOver={(event) => { event.preventDefault(); setOver(true); }}
         onDragLeave={() => setOver(false)}
         onDrop={(event) => { event.preventDefault(); void analyze(event.dataTransfer.files); }}
       >
         <span className="inline-flex size-12 items-center justify-center rounded-full bg-primary-soft text-primary"><Upload size={24} strokeWidth={1.5} aria-hidden="true" /></span>
         <span className="text-title-sm text-ink">카드 명세서를 끌어다 놓거나 선택하세요</span>
-        <span className="text-body-sm text-muted">CSV, xls, xlsx · 한 번에 한 파일 · 최대 5MB · 3,000건</span>
-        <input className="sr-only" type="file" accept=".csv,.xls,.xlsx" disabled={disabled} onChange={(event) => { void analyze(event.target.files); event.target.value = ""; }} />
+        <span className="text-body-sm text-muted">CSV, xls, xlsx · 한 번에 한 파일 · 최대 4MB · 3,000건</span>
+        <input className="sr-only" type="file" accept=".csv,.xls,.xlsx" onChange={(event) => { void analyze(event.target.files); event.target.value = ""; }} />
       </label>
-      {disabled && <div className="grid gap-3"><Notice>이번 달 분석 횟수를 모두 사용했어요. 요금제를 확인하거나 다음 달에 다시 이용해 주세요.</Notice><div><Button variant="primary" size="md" href="/#pricing">요금제 살펴보기</Button><p className="mt-3 text-caption text-muted">테스트 결제 환경이며 실제로 청구되지 않습니다</p></div></div>}
       {error && <Notice variant="error">{message ? <><strong>{message[1]}</strong> {message[2]}</> : error}</Notice>}
     </div>
   );

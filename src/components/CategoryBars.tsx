@@ -1,4 +1,4 @@
-import { formatAmount } from "@/lib/format";
+import { formatNumber } from "@/lib/format";
 
 type CategoryBarsProps = {
   rows: { label: string; amount: bigint; ratio: number }[];
@@ -18,7 +18,7 @@ export function CategoryBars({ rows }: CategoryBarsProps) {
             <span aria-hidden="true" className="col-span-3 row-start-2 sm:col-span-1 sm:row-start-auto">
               {amount > 0n && <span className="block h-3 overflow-hidden rounded-pill bg-surface-strong"><span className="block h-full rounded-pill bg-primary" style={{ width: `${Number(amount * 10000n / max) / 100}%` }} /></span>}
             </span>
-            <span className="text-right text-number-md text-ink tabular-nums">{formatAmount(amount).slice(0, -1)}<span className="text-caption">원</span></span>
+            <span className="text-right text-number-md text-ink tabular-nums">{formatNumber(amount)}<span className="text-caption">원</span></span>
             <span className="text-right text-body-sm text-muted tabular-nums">{ratio}%</span>
           </li>
         ))}

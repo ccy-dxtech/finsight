@@ -33,6 +33,19 @@ export interface ReportInsights {
   savingTips: { title: string; detail: string }[];
 }
 
+// reports 행의 jsonb 모양: commit_analysis RPC로 넘길 때 bigint를 문자열로 바꿔 정밀도를 지킨다.
+export type StoredTransaction = Omit<Transaction, "amount"> & { amount: string };
+
+export interface StoredReportTotals {
+  totalAmount: string;
+  categoryTotals: Record<Category, string>;
+}
+
+export interface StoredReportInsights extends Omit<ReportInsights, "recurring" | "anomalies"> {
+  recurring: { transactions: StoredTransaction[]; note: string }[];
+  anomalies: { transaction: StoredTransaction; reason: string }[];
+}
+
 export interface Report {
   id: string;
   userId: string;

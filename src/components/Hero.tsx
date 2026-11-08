@@ -13,7 +13,7 @@ export function Hero({ isLoggedIn }: { isLoggedIn: boolean }) {
       <div className="mx-auto grid max-w-[1200px] items-center gap-12 px-8 py-24 text-left xl:grid-cols-[minmax(0,1fr)_480px]">
         <div>
           <Badge variant="pro">AI 지출 리포트</Badge>
-          <h1 className="mt-4 text-display-md text-ink sm:text-display-lg">
+          <h1 className="mt-4 text-display-sm text-ink sm:text-display-lg">
             카드 명세서만 올리면,<br />
             <em className="text-primary not-italic">새는 돈</em>이 보여요
           </h1>

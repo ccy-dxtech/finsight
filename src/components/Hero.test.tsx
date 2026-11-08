@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Hero } from "./Hero";
@@ -13,6 +14,15 @@ it.each([
   expect(html).toContain("text-left");
   expect(html).not.toContain("text-center");
   expect(html).toContain("카드 명세서만 올리면,");
+});
+
+it("제목은 모바일 32px(display-sm), 640px 이상 48px(display-lg)로 두 줄을 지킨다", () => {
+  const html = renderToStaticMarkup(<Hero isLoggedIn={false} />);
+  const h1Class = html.match(/<h1 class="([^"]+)"/)?.[1].split(" ") ?? [];
+  expect(h1Class).toEqual(expect.arrayContaining(["text-display-sm", "sm:text-display-lg"]));
+  expect(h1Class).not.toContain("text-display-md");
+  const globals = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
+  expect(globals).toMatch(/--text-display-sm:\s*32px;/);
 });
 
 it("시작하기 바로 아래 캡션으로 저장하지 않는 것과 무료 횟수를 알린다", () => {

@@ -7,6 +7,8 @@ src/
 │   ├── layout.tsx                  # 루트 레이아웃: <html lang="ko">, Pretendard(pretendard 패키지), globals.css
 │   ├── globals.css                 # Tailwind @theme 디자인 토큰 (docs/design-system/tokens.css 값을 옮긴 단일 출처)
 │   ├── page.tsx                    # 랜딩
+│   ├── error.tsx                   # 한국어 오류 화면(다시 시도 / 대시보드로 가기). 오류 내용은 보여주지 않음
+│   ├── not-found.tsx               # 한국어 404(대시보드로 가기)
 │   ├── login/page.tsx              # Google 로그인
 │   ├── auth/callback/route.ts      # Supabase OAuth 콜백 (세션 교환 후 next 경로로 이동)
 │   ├── dashboard/
@@ -28,7 +30,12 @@ src/
 │   ├── aggregate/                  # 카테고리 합계, 월별 집계, 증감률 (순수 함수)
 │   ├── plan.ts                     # 플랜별 한도(Free 3, Pro 30)와 리포트 모델, KST 월 경계
 │   ├── categories.ts               # 고정 카테고리 10개 (단일 출처)
-│   └── supabase/                   # server / browser 클라이언트, 세션 갱신 헬퍼
+│   ├── upload.ts                   # 업로드 파일 형식·크기(4MB) 확인. 클라이언트와 analyze 라우트가 같이 씀
+│   ├── format.ts                   # 금액·숫자·날짜·기간·연월 표시
+│   ├── report.ts                   # 저장된 리포트 jsonb(문자열 금액)를 bigint로 복원
+│   ├── billing/                    # Polar 웹훅 이벤트 → 플랜 변경 판단
+│   ├── client/                     # 클라이언트에서 부르는 내부 API(데이터 삭제)
+│   └── supabase/                   # server / browser 클라이언트, 세션 갱신 헬퍼, getSessionPlan(세션 + profiles.plan)
 ├── services/
 │   └── claude.ts                   # mapColumns, classifyMerchants, writeReport (server-only)
 └── middleware.ts                   # Supabase 세션 갱신, /dashboard 보호 (Next 16+는 proxy.ts)
@@ -51,12 +58,13 @@ supabase/
 | `/` | `Hero` → `StepList` → `PricingTier` → 푸터 |
 | `/login` | 가운데 `Button`(Google, 큰 버튼) 하나 |
 | `/dashboard/*` 공통 | `AppHeader`(dashboard/layout.tsx) |
-| `/dashboard` | `UploadDropzone`(분석 중에는 그 자리에 `AnalyzingState`) → `UsageMeter` → `ReportListItem` 목록 |
+| `/dashboard` | `UploadDropzone`(분석 중에는 그 자리에 `AnalyzingState`, 이번 달 횟수를 다 쓰면 그 자리에 `LockedPanel` 소진 카드) → `UsageMeter` → `ReportListItem` 목록 |
 | `/dashboard/reports/[id]` | `StatSummary` → `CategoryBars` → `InsightList`(정기결제·이상 지출) → `SavingTip` |
-| `/dashboard/trends` | 프로: `MonthlyChart` + `ChangeTable` / 무료: `LockedPanel` |
+| `/dashboard/trends` | 프로: `MonthlyChart` + `ChangeTable`(거래가 있는 가장 최근 달 vs 그 전달, 전달 거래가 없으면 표 대신 안내) / 무료: `LockedPanel` |
 | `/dashboard/settings` | `SettingsRow` 목록(플랜, 구독 관리, 데이터 삭제, 로그아웃) |
 | 여러 화면 | `Button`, `Badge`, `Notice`(오류·결제 확인 중·결제 완료 안내) |
 - **서버 전용 모듈**: 외부 API와 비밀값을 쓰는 모듈(`services/`, service role 클라이언트)은 `import "server-only"`로 클라이언트 번들 유입을 막는다.
+- **플랜 읽기**: 대시보드 layout·page와 `/api/checkout`은 `lib/supabase/session-plan`의 `getSessionPlan()`으로 세션과 `profiles.plan`을 읽는다. React `cache`로 감싸 같은 요청 안에서는 한 번만 조회한다. 로그인하지 않았으면 `null`, 플랜을 읽지 못하면 오류를 던져 `error.tsx`가 받는다.
 - **순수 함수**: 파일 처리와 집계 로직은 `lib/`의 순수 함수로 만들고 단위 테스트로 검증한다. 라우트 핸들러는 이 함수들을 조합만 한다.
 - **숫자는 코드, 해석은 AI**: 합계·건수·증감률은 `lib/aggregate`가 계산한다. AI 리포트는 거래를 id로 참조하고, 그 id를 날짜·가맹점·금액으로 바꾸는 것은 코드가 한다.
 - **런타임**: `api/analyze`는 Node.js 런타임에서 돌린다(SheetJS와 EUC-KR 디코딩 때문). `maxDuration`은 Vercel 플랜 한도 안에서 크게 잡는다.
@@ -76,7 +84,7 @@ supabase/
 
 ### 분석 (`POST /api/analyze`, multipart 파일 1개)
 ```
-1. 세션 확인(401) → 형식·크기 확인(5MB)
+1. 세션 확인(401) → 형식·크기 확인(4MB, `lib/upload.ts`. Vercel 요청 본문 한도 4.5MB 안쪽)
 2. 한도 확인: profiles.plan과 이번 달 usage.count를 읽어 한도 이상이면 중단 (한도 확인은 여기 한 곳). 이때 읽은 plan으로 리포트 모델도 정한다
 3. 파일 읽기: xls/xlsx는 SheetJS, CSV는 UTF-8(fatal) 실패 시 EUC-KR로 읽어 SheetJS 파싱
    → 상단 10행 마스킹(6자리 이상 숫자) → claude.mapColumns (Haiku)
@@ -112,20 +120,21 @@ supabase/
 
 ### 결제 (Polar, `@polar-sh/nextjs`, `POLAR_SERVER=sandbox`)
 ```
-"프로 구독하기" → /api/checkout (비로그인이면 /login?next=/api/checkout)
+"프로 구독하기" → /api/checkout (비로그인이면 /login?next=/api/checkout, 이미 프로면 /dashboard/settings)
   → 세션의 user.id를 external customer id로 서버에서 지정하고 POLAR_PRO_PRODUCT_ID로 결제 생성 → Polar 결제 화면
-  → successUrl: /dashboard?checkout=success ("결제 확인 중" 안내만 표시, 플랜 판단에는 쓰지 않음)
-Polar → /api/webhooks/polar (POLAR_WEBHOOK_SECRET 서명 검증)
+  → successUrl: /dashboard?checkout=success (아직 무료면 "결제 확인 중", 이미 프로면 "프로 구독을 시작했어요" 안내. 플랜 판단은 profiles.plan으로만)
+Polar → /api/webhooks/polar (POLAR_WEBHOOK_SECRET 서명 검증, product_id가 POLAR_PRO_PRODUCT_ID인 구독만)
   subscription.active  → profiles.plan = 'pro'
   subscription.revoked → profiles.plan = 'free'
   subscription.canceled → 아무것도 하지 않음 (기간 끝까지 Pro, 끝나면 revoked가 옴)
-"구독 관리" → /api/portal → 세션 user.id로 고객 포털 세션 생성 → Polar 고객 포털
+"구독 관리" → /api/portal (비로그인이면 /login?next=/api/portal) → 세션 user.id로 고객 포털 세션 생성 → Polar 고객 포털 (returnUrl: /dashboard/settings)
 ```
 - external customer id는 쿼리 파라미터로 받지 않는다. 다른 사용자 id를 넣는 것을 막기 위해서다.
 - 웹훅은 service role 클라이언트로 `profiles`를 갱신한다. 웹훅 기록 테이블이나 결제 상태 폴링은 두지 않는다.
 
 ### 데이터 삭제 (`DELETE /api/data`)
 - 사용자 세션으로 본인의 `transactions`와 `reports`를 삭제한다. `profiles`와 `usage`는 남긴다.
+- 두 테이블을 따로 지우므로 중간에 실패하면 일부만 지워질 수 있다. 오류 안내는 "일부만 지워졌을 수 있어요"라고 말하고, 다시 시도하면 남은 것이 지워진다(PRD 한계).
 
 ## 상태 관리
 - 서버 상태는 Server Components에서 Supabase(사용자 세션 + RLS)로 읽는다. 변경 후에는 `router.refresh()`나 이동으로 다시 읽는다.

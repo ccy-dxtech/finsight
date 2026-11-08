@@ -25,6 +25,9 @@
 5. **AC는 실행 가능한 커맨드** — "~가 동작해야 한다" 같은 추상적 서술이 아닌 `npm run build && npm test` 같은 실제 실행 가능한 검증 커맨드를 포함한다.
 6. **주의사항은 구체적으로** — "조심해라" 대신 "X를 하지 마라. 이유: Y" 형식으로 적는다.
 7. **네이밍** — step name은 kebab-case slug로, 해당 step의 핵심 모듈/작업을 한두 단어로 표현한다 (예: `project-setup`, `api-layer`, `auth-flow`).
+8. **마지막 step은 리뷰** — 각 phase의 마지막 step은 `phase-review`로 둔다(템플릿은 D-4). 이 step은 코드를 고치지 않고 phase 전체 변경을 리뷰해 `phases/{task-name}/review.md`에 적는다. 이유: build·test AC만 통과하고 끝난 2-app에서 웹훅 상품 확인 누락, 중복 구독, 횟수 소진 화면 같은 문제가 나중 리뷰에서야 나왔다.
+9. **사용자 여정 AC** — 화면 흐름을 바꾸는 step의 AC에는 해당 E2E 시나리오(`npx playwright test tests/e2e/<시나리오>.spec.ts`)를 넣는다. `.env.local`이나 Supabase가 없어 실행할 수 없으면 실패로 보지 않고 summary에 "E2E 미실행"이라고 적는다.
+10. **리뷰 지적 수정도 phase로** — 리뷰에서 고칠 것이 여러 건이면 `{N}-review-fixes` phase로 만든다. step마다 AC 검증과 커밋이 따로 되어 커밋별로 검증된다. 사용자가 정해야 하는 것(동작 기준, 범위)은 step 파일을 만들기 전에 B. 논의에서 묻는다. 이유: step 실행 중에는 사용자에게 질문할 수 없다.
 
 ### D. 파일 생성
 
@@ -65,7 +68,7 @@
 
 필드 규칙:
 
-- `project`: 프로젝트명 (CLAUDE.md 참조).
+- `project`: 프로젝트명 (AGENTS.md 참조).
 - `phase`: task 이름. 디렉토리명과 일치시킨다.
 - `steps[].step`: 0부터 시작하는 순번.
 - `steps[].name`: kebab-case slug.
@@ -117,7 +120,7 @@ npm test        # 테스트 통과
 2. 아키텍처 체크리스트를 확인한다:
    - ARCHITECTURE.md 디렉토리 구조를 따르는가?
    - ADR 기술 스택을 벗어나지 않았는가?
-   - CLAUDE.md CRITICAL 규칙을 위반하지 않았는가?
+   - AGENTS.md CRITICAL 규칙을 위반하지 않았는가?
 3. 결과에 따라 `phases/{task-name}/index.json`의 해당 step을 업데이트한다:
    - 성공 → `"status": "completed"`, `"summary": "산출물 한 줄 요약"`
    - 수정 3회 시도 후에도 실패 → `"status": "error"`, `"error_message": "구체적 에러 내용"`
@@ -127,6 +130,43 @@ npm test        # 테스트 통과
 
 - {이 step에서 하지 말아야 할 것. "X를 하지 마라. 이유: Y" 형식}
 - 기존 테스트를 깨뜨리지 마라
+```
+
+#### D-4. `phase-review` step (각 phase의 마지막 step)
+
+```markdown
+# Step {N}: phase-review
+
+## 읽어야 할 파일
+
+- `/AGENTS.md`, `/docs/ARCHITECTURE.md`, `/docs/ADR.md`, `/docs/UI_GUIDE.md`, `/docs/UX_GUIDE.md`
+- `/.claude/commands/review.md` (리뷰 체크리스트)
+
+## 작업
+
+`git diff main...HEAD`로 이 phase의 변경 전체를 보고 `/.claude/commands/review.md`의 체크리스트로 리뷰해
+`phases/{task-name}/review.md`에 적는다.
+
+- 지적마다 심각도(P0: 출시를 막음, P1: 고쳐야 함, P2: 개선), `파일:줄`, 실패하는 상황, 수정 방향을 적는다.
+- `docs/UX_GUIDE.md` 점검 표에서 아직 열린 항목도 옮겨 적는다.
+- 외부 SDK 필드에 대한 지적은 `node_modules`의 실제 타입으로 확인한 것만 적는다.
+
+## Acceptance Criteria
+
+```bash
+test -s phases/{task-name}/review.md   # 리뷰 결과가 비어 있지 않음
+git diff --exit-code -- src tests      # 이 step은 코드를 바꾸지 않음
+```
+
+## 검증 절차
+
+1. 위 AC 커맨드를 실행한다.
+2. `phases/{task-name}/index.json`의 해당 step을 `"status": "completed"`,
+   `"summary": "리뷰 P0 {n}건·P1 {n}건·P2 {n}건, phases/{task-name}/review.md"`로 업데이트한다.
+
+## 금지사항
+
+- 코드·테스트·문서를 고치지 마라. 이유: 리뷰와 수정을 섞으면 지적이 검증 없이 반영된다. 수정은 다음 phase(`{N}-review-fixes`)에서 한다.
 ```
 
 ### E. 실행
@@ -139,7 +179,7 @@ python3 scripts/execute.py {task-name} --push  # 실행 후 push
 execute.py가 자동으로 처리하는 것:
 
 - `feat-{task-name}` 브랜치 생성/checkout
-- 가드레일 주입 — CLAUDE.md + docs/*.md 내용을 매 step 프롬프트에 포함
+- 가드레일 주입 — AGENTS.md + docs/*.md(하위 폴더 제외) 내용을 매 step 프롬프트에 포함. CLAUDE.md는 `@AGENTS.md`로 같은 파일을 가져오므로 규칙은 AGENTS.md에서 고친다.
 - 컨텍스트 누적 — 완료된 step의 summary를 다음 step 프롬프트에 전달
 - 자가 교정 — 실패 시 최대 3회 재시도하며, 이전 에러 메시지를 프롬프트에 피드백
 - 2단계 커밋 — 코드 변경(`feat`)과 메타데이터(`chore`)를 분리 커밋

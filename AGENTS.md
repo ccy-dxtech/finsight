@@ -1,7 +1,7 @@
 # 프로젝트: FinSight
 
 카드 명세서(CSV·엑셀)를 올리면 AI가 지출을 분석해 한국어 인사이트 리포트를 주는 구독형 웹앱. MVP·프로토타입 단계.
-기획은 `docs/PRD.md`, 구조는 `docs/ARCHITECTURE.md`, 결정 근거는 `docs/ADR.md`, 화면 규칙은 `docs/UI_GUIDE.md`, 디자인 토큰·컴포넌트 명세는 `docs/design-system/`.
+기획은 `docs/PRD.md`, 구조는 `docs/ARCHITECTURE.md`, 결정 근거는 `docs/ADR.md`, 화면 규칙은 `docs/UI_GUIDE.md`, 사용자 여정·단계별 다음 행동은 `docs/UX_GUIDE.md`, 디자인 토큰·컴포넌트 명세는 `docs/design-system/`.
 
 ## 기술 스택
 - Next.js (App Router) + TypeScript strict mode
@@ -33,3 +33,13 @@ npm run dev      # 개발 서버
 npm run build    # 프로덕션 빌드
 npm run lint     # ESLint
 npm run test     # 테스트
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

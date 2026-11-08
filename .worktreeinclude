@@ -1,0 +1,3 @@
+# Claude Code가 worktree를 만들 때 복사할 gitignore된 파일(.gitignore 문법).
+# gitignore된 파일 중 이 패턴에 맞는 것만 복사된다.
+.env.local

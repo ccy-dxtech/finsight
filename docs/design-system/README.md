@@ -52,7 +52,7 @@ FinSight는 카드 명세서를 올리면 AI가 지출을 한국어 리포트로
 
 ## 화면별 구성
 
-- `/` 랜딩: `Hero` → `StepList` → `PricingTier` → 푸터(`surface-soft`, `caption`).
+- `/` 랜딩: 헤더(로고 + 보조 버튼, `AppHeader` 명세) → `Hero`(1280px 이상에서 오른쪽에 `Cover` 그림) → `StepList`(`surface-soft` 띠 위 흰 카드) → `PricingTier` → 푸터(`surface-soft`, 로고 + `caption`).
 - `/login`: 가운데 정렬. 로고(`/` 링크) → 한 문장(`body-lg`) → `fs-btn--google` 큰 버튼 하나.
 - `/dashboard`: `AppHeader` → `UploadDropzone` → `UsageMeter` → `ReportListItem` 목록.
 - `/dashboard/reports/[id]`: `StatSummary` → `CategoryBars` → `InsightList`(정기결제·이상 지출) → `SavingTip`.

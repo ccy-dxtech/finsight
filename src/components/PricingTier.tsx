@@ -19,7 +19,11 @@ export function PricingTier({ tier, priceLabel }: PricingTierProps) {
         {isPro ? "프로" : "무료"}
         {isPro && <Badge variant="pro">추천</Badge>}
       </h3>
-      <p className="text-number-lg text-ink tabular-nums">{priceLabel}</p>
+      <p className="text-ink tabular-nums">
+        {priceLabel.split(/([\d,]+)/).filter(Boolean).map((part, index) => (
+          <span key={index} className={/\d/.test(part) ? "text-display-md" : index > 0 ? "ml-1 text-title-sm text-body" : "text-title-sm text-body"}>{part}</span>
+        ))}
+      </p>
       <ul className="grid gap-3 text-body-md">
         {features.map((feature, index) => {
           const unavailable = !isPro && index === 2;
@@ -36,7 +40,9 @@ export function PricingTier({ tier, priceLabel }: PricingTierProps) {
         <Button variant="secondary" size="md" href={isPro ? "/api/checkout" : "/login"} className="w-full">
           {isPro ? "프로 구독하기" : "시작하기"}
         </Button>
-        {isPro && <p className="mt-3 text-caption text-muted">테스트 결제 환경이며 실제로 청구되지 않습니다</p>}
+        <p className="mt-3 text-center text-caption text-muted">
+          {isPro ? "테스트 결제 환경이며 실제로 청구되지 않습니다" : "결제 정보 없이 바로 시작해요"}
+        </p>
       </div>
     </article>
   );

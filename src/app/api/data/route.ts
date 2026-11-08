@@ -17,8 +17,9 @@ export async function DELETE() {
 
     return NextResponse.json({ ok: true });
   } catch {
+    // 거래와 리포트를 따로 지우므로 거래만 지워진 상태일 수 있다. 다시 시도하면 남은 것이 지워진다.
     return NextResponse.json({
-      message: "데이터를 삭제하지 못했어요. 다시 시도해 주세요. 횟수는 차감되지 않았어요.",
+      message: "**데이터를 모두 지우지 못했어요.** 일부만 지워졌을 수 있어요. 다시 시도해 주세요.",
     }, { status: 500 });
   }
 }

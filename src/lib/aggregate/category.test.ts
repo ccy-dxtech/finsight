@@ -1,6 +1,21 @@
 import { describe, expect, it } from "vitest";
 import type { Transaction } from "@/types";
-import { sumByCategory } from "./category";
+import { rankCategoryTotals, sumByCategory } from "./category";
+
+describe("rankCategoryTotals", () => {
+  it("저장된 카테고리 합계를 큰 순서로 정렬하고 0원은 빼며 양수 합계 기준 반올림 비율을 붙인다", () => {
+    expect(rankCategoryTotals({ 교통: 100n, 식비: 100n, 교육: 0n, 쇼핑: 600n, "기타": -50n })).toEqual([
+      { category: "쇼핑", total: 600n, ratio: 75 },
+      { category: "식비", total: 100n, ratio: 13 },
+      { category: "교통", total: 100n, ratio: 13 },
+      { category: "기타", total: -50n, ratio: 0 },
+    ]);
+  });
+
+  it("양수 합계가 없으면 모든 비율이 0이다", () => {
+    expect(rankCategoryTotals({ 식비: -10n })).toEqual([{ category: "식비", total: -10n, ratio: 0 }]);
+  });
+});
 
 const txn = (amount: bigint, category?: Transaction["category"]): Transaction => ({
   id: 1, occurredOn: "2026-10-03", merchant: "가게", amount, category,

@@ -34,3 +34,21 @@ export function categoryChanges(
     return { category, last, current, diff: current - last };
   });
 }
+
+// 명세서는 달이 끝난 뒤에 받으므로 오늘 날짜가 아니라 거래가 있는 가장 최근 달을 기준으로 삼는다.
+export function latestMonthChanges(txns: readonly Transaction[]): {
+  currentMonth: string; previousMonth: string; rows: ReturnType<typeof categoryChanges>;
+} | null {
+  if (txns.length === 0) return null;
+
+  const currentMonth = txns.reduce((latest, txn) => {
+    const month = txn.occurredOn.slice(0, 7);
+    return month > latest ? month : latest;
+  }, "");
+  const [year, month] = currentMonth.split("-").map(Number);
+  const previousMonth = month === 1 ? `${year - 1}-12` : `${year}-${String(month - 1).padStart(2, "0")}`;
+  // 전달 거래가 없으면 모든 카테고리가 0원 대비 증가로 보이므로 비교하지 않는다.
+  const hasPrevious = txns.some((txn) => txn.occurredOn.startsWith(previousMonth));
+
+  return { currentMonth, previousMonth, rows: hasPrevious ? categoryChanges(txns, currentMonth, previousMonth) : [] };
+}

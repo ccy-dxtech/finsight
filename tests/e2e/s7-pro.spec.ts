@@ -45,7 +45,9 @@ test.describe("S7. 프로로 전환 (웹훅 반영을 DB로 흉내)", () => {
     await expect(months.filter({ hasText: `${Number(thisMonth.slice(5, 7))}월` })).toContainText("65,000원");
     await expect(months.filter({ hasText: `${Number(lastMonth.slice(5, 7))}월` })).toContainText("42,000원");
 
-    const table = page.getByRole("table", { name: "카테고리별 지난달과 이번 달 지출 비교" });
+    // 거래가 있는 가장 최근 달(이번 달)과 그 전달(지난달)을 실제 달 이름으로 비교한다.
+    const label = (month: string) => `${month.slice(0, 4)}년 ${Number(month.slice(5, 7))}월`;
+    const table = page.getByRole("table", { name: `카테고리별 ${label(lastMonth)}과 ${label(thisMonth)} 지출 비교` });
     await expect(table.getByRole("row", { name: /식비/ })).toContainText("▲ +15,000원");
     await expect(table.getByRole("row", { name: /카페·간식/ })).toContainText("▼ −12,000원");
     await expect(table.getByRole("row", { name: /교통/ })).toContainText("▲ +20,000원");

@@ -19,6 +19,8 @@ it("비로그인 랜딩에 히어로, 사용 방법, 요금제, 푸터를 순서
   expect(html.indexOf("<ol")).toBeLessThan(html.indexOf("월 3회 분석"));
   expect(html.indexOf("월 30회 분석")).toBeLessThan(html.indexOf("<footer"));
   expect(html).toMatch(/<footer[^>]*>.*FinSight/);
+  // 요금제로 가는 링크(/#pricing)가 도착할 곳
+  expect(html).toMatch(/<section[^>]*id="pricing"[^>]*>.*나에게 맞는 요금제/);
   expect(html).not.toMatch(/Get started|Upgrade|Powered by AI|FAQ/);
 });
 

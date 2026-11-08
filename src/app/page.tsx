@@ -16,7 +16,7 @@ export default async function Home() {
           <h2 id="steps-title" className="mb-8 text-display-md text-ink">이렇게 시작해요</h2>
           <StepList />
         </section>
-        <section aria-labelledby="pricing-title" className="break-keep py-24">
+        <section id="pricing" aria-labelledby="pricing-title" className="break-keep py-24">
           <h2 id="pricing-title" className="mb-8 text-display-md text-ink">나에게 맞는 요금제</h2>
           <div className="grid gap-6 md:grid-cols-2">
             <PricingTier tier="free" priceLabel="0원" />

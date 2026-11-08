@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { FileText } from "lucide-react";
-import { formatAmount, formatDate, formatPeriod } from "@/lib/format";
+import { formatDate, formatNumber, formatPeriod } from "@/lib/format";
 
 type ReportListItemProps = {
   id: string;
@@ -12,7 +12,6 @@ type ReportListItemProps = {
 };
 
 export function ReportListItem({ id, fileName, periodStart, periodEnd, totalAmount, createdAt }: ReportListItemProps) {
-  const amount = formatAmount(totalAmount);
   return (
     <li className="group border-b border-hairline last:border-0">
       <Link href={`/dashboard/reports/${id}`} className="flex min-h-14 flex-wrap items-center gap-4 rounded-md py-3 hover:shadow-soft">
@@ -21,7 +20,7 @@ export function ReportListItem({ id, fileName, periodStart, periodEnd, totalAmou
           <p className="wrap-anywhere text-number-md text-ink">{fileName}</p>
           <p className="text-body-sm text-muted tabular-nums">{formatPeriod(periodStart, periodEnd)} · 생성 {formatDate(createdAt)}</p>
         </div>
-        <p className="ml-auto text-right text-number-md text-ink tabular-nums">{amount.slice(0, -1)}<span className="text-caption">원</span></p>
+        <p className="ml-auto text-right text-number-md text-ink tabular-nums">{formatNumber(totalAmount)}<span className="text-caption">원</span></p>
       </Link>
     </li>
   );

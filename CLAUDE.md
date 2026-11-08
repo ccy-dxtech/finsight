@@ -25,6 +25,7 @@
 
 ## 개발 프로세스
 - CRITICAL: 새 기능 구현 시 반드시 테스트를 먼저 작성하고, 테스트가 통과하는 구현을 작성할 것 (TDD)
+- UI(컴포넌트, 페이지, `globals.css`)를 고친 뒤에는 `docs/BROWSER_TESTING.md` 절차대로 Playwright MCP로 화면을 열어 스크린샷(데스크톱·375px)과 콘솔 오류를 확인한 다음 완료라고 말할 것
 - 커밋 메시지는 conventional commits 형식을 따를 것 (feat:, fix:, docs:, refactor:)
 
 ## 명령어

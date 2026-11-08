@@ -25,6 +25,7 @@
 
 ## 개발 프로세스
 - CRITICAL: 새 기능 구현 시 반드시 테스트를 먼저 작성하고, 테스트가 통과하는 구현을 작성할 것 (TDD)
+- 원본 레포 [jha0313/finsight](https://github.com/jha0313/finsight)(2026-06)나 강의 코드를 참고할 때는 `docs/REFERENCE_DIFF.md`를 먼저 볼 것. 원본 방식이 지금 버전이나 Windows에서 동작하지 않아 다른 방법을 썼다면 그 문서 표에 한 줄 추가할 것
 - 커밋 메시지는 conventional commits 형식을 따를 것 (feat:, fix:, docs:, refactor:)
 
 ## 명령어

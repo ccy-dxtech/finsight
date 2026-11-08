@@ -13,6 +13,10 @@
 #     원본은 Windows에서 types/, page.tsx 같은 예외 규칙이 걸리지 않아 오탐 차단했다.
 #   - 예외 규칙은 프로젝트 기준 상대경로에 적용한다.
 #     원본은 절대경로 전체에 *test* 를 걸어, 프로젝트 경로에 test가 들어가면 가드가 꺼졌다.
+#   - 프로젝트 루트는 훅 입력 JSON의 cwd가 속한 git 저장소 루트로 정한다.
+#     $CLAUDE_PROJECT_DIR은 worktree 세션에서도 원래 저장소를 가리켜, 상대경로가
+#     /.claude/worktrees/<이름>/... 이 되고 worktree 이름에 test·spec이 들어가면 가드가 꺼졌다.
+#     cwd가 없으면(예: Codex) 예전처럼 $CLAUDE_PROJECT_DIR → 현재 폴더의 git 루트 순서.
 #   - 입출력을 UTF-8 / ASCII 이스케이프 JSON으로 고정한다 (Windows 기본 인코딩 cp949 대비).
 #   - Codex apply_patch 입력(.tool_input.command의 *** Add/Update File:) 지원은 그대로 둔다.
 
@@ -36,10 +40,29 @@ if [ -z "$PY" ]; then
   exit 0
 fi
 
-if [ -n "${CLAUDE_PROJECT_DIR:-}" ]; then
-  PROJECT_ROOT="${CLAUDE_PROJECT_DIR//\\//}"
-else
-  PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+HOOK_CWD=$(printf '%s' "$INPUT" | "$PY" -c '
+import json
+import sys
+
+try:
+    payload = json.loads(sys.stdin.buffer.read().decode("utf-8", "replace"))
+except Exception:
+    sys.exit(0)
+cwd = payload.get("cwd") if isinstance(payload, dict) else None
+if isinstance(cwd, str):
+    sys.stdout.buffer.write(cwd.encode("utf-8"))
+')
+
+PROJECT_ROOT=""
+if [ -n "$HOOK_CWD" ]; then
+  PROJECT_ROOT=$(git -C "$HOOK_CWD" rev-parse --show-toplevel 2>/dev/null)
+fi
+if [ -z "$PROJECT_ROOT" ]; then
+  if [ -n "${CLAUDE_PROJECT_DIR:-}" ]; then
+    PROJECT_ROOT="${CLAUDE_PROJECT_DIR//\\//}"
+  else
+    PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+  fi
 fi
 PROJECT_ROOT="${PROJECT_ROOT%/}"
 

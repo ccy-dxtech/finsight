@@ -1,5 +1,6 @@
 import * as XLSX from "xlsx";
 import { decodeCsv } from "./decode";
+import { readPdfRows } from "./pdf";
 
 type StatementErrorCode = "unsupported_file" | "too_many_rows" | "no_transactions";
 
@@ -10,11 +11,18 @@ export class StatementError extends Error {
   }
 }
 
-export function parseStatement(buffer: ArrayBuffer, fileName: string): string[][] {
-  const extension = fileName.match(/\.(csv|xls|xlsx)$/i)?.[1].toLowerCase();
+export async function parseStatement(buffer: ArrayBuffer, fileName: string): Promise<string[][]> {
+  const extension = fileName.match(/\.(csv|xls|xlsx|pdf)$/i)?.[1].toLowerCase();
   if (!extension) throw new StatementError("unsupported_file");
 
   try {
+    if (extension === "pdf") {
+      const rows = await readPdfRows(buffer);
+      // 글자가 없는 PDF(스캔본)는 AI 열 매핑까지 가지 않고 여기서 거절한다.
+      if (rows.length === 0) throw new Error();
+      return rows;
+    }
+
     const workbook = extension === "csv"
       ? XLSX.read(decodeCsv(buffer), { type: "string", raw: true })
       : XLSX.read(buffer, { type: "array", dateNF: "yyyy-mm-dd" });

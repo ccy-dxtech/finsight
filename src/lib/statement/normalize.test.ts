@@ -18,7 +18,7 @@ describe("normalizeRows", () => {
         { id: 3, occurredOn: "2026-10-03", merchant: "GS25", amount: 12500n },
         { id: 5, occurredOn: "2026-10-04", merchant: "카페", amount: -2500n },
       ],
-      excludedCount: 1,
+      excludedCount: 0,
     });
     expect(rows).toEqual(original);
   });
@@ -39,13 +39,10 @@ describe("normalizeRows", () => {
   });
 
   it.each([
-    ["2026-02-29", "가게", "1"], ["2026-04-31", "가게", "1"],
-    ["2026-13-01", "가게", "1"], ["2026-00-01", "가게", "1"],
-    ["60", "가게", "1"], ["", "가게", "1"],
     ["20261003", "가게", ""], ["20261003", "가게", "1.5"],
     ["20261003", "가게", "1e3"], ["20261003", "가게", "금액없음"],
     ["20261003", "   ", "1"],
-  ])("읽을 수 없는 행 %s / %s / %s를 제외한다", (date, merchant, amount) => {
+  ])("날짜는 읽었지만 가맹점·금액을 못 읽은 행 %s / %s / %s는 제외 건수에 센다", (date, merchant, amount) => {
     const rows = [...header, [date, "", merchant, amount], ["20261003", "", "가게", "1"]];
     const result = normalizeRows(rows, mapping);
     expect(result.excludedCount).toBe(1);
@@ -54,9 +51,24 @@ describe("normalizeRows", () => {
     ]);
   });
 
-  it("짧은 행과 빈 행도 제외 건수에 포함한다", () => {
+  // PDF의 반복 머리행·쪽 번호·합계 행, CSV의 빈 줄처럼 날짜가 없는 행은 거래가 아니라서 세지 않는다.
+  it.each([
+    ["2026-02-29", "가게", "1"], ["2026-04-31", "가게", "1"],
+    ["2026-13-01", "가게", "1"], ["2026-00-01", "가게", "1"],
+    ["60", "가게", "1"], ["", "가게", "1"],
+    ["날짜", "가맹점", "금액"], ["", "합계", "1,603,300원"], ["", "1 / 2", ""],
+  ])("날짜를 못 읽은 행 %s / %s / %s는 거래로도 제외 건수로도 세지 않는다", (date, merchant, amount) => {
+    const rows = [...header, [date, "", merchant, amount], ["20261003", "", "가게", "1"]];
+    const result = normalizeRows(rows, mapping);
+    expect(result.excludedCount).toBe(0);
+    expect(result.transactions).toEqual([
+      { id: 4, occurredOn: "2026-10-03", merchant: "가게", amount: 1n },
+    ]);
+  });
+
+  it("빈 행은 세지 않고, 날짜만 있는 짧은 행은 제외 건수에 센다", () => {
     const result = normalizeRows([...header, [], ["20261003"], ["20261003", "", "가게", "1"]], mapping);
-    expect(result.excludedCount).toBe(2);
+    expect(result.excludedCount).toBe(1);
   });
 
   it.each([

@@ -53,10 +53,12 @@ export function normalizeRows(rows: string[][], mapping: ColumnMapping): {
   for (let i = mapping.headerRowIndex + 1; i < rows.length; i++) {
     const row = rows[i];
     const occurredOn = normalizeDate(row[mapping.dateCol] ?? "");
+    // 날짜가 없는 행(빈 줄, 반복 머리행, 쪽 번호, 합계 행)은 거래가 아니라서 제외 건수에도 넣지 않는다.
+    if (!occurredOn) continue;
     const merchant = (row[mapping.merchantCol] ?? "").trim();
     const amount = normalizeAmount(row[mapping.amountCol] ?? "");
 
-    if (!occurredOn || !merchant || amount === null) {
+    if (!merchant || amount === null) {
       excludedCount++;
       continue;
     }

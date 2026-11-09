@@ -26,7 +26,7 @@ src/
 ├── components/                     # UI 컴포넌트, 디자인 시스템과 같은 이름 (차트 포함, 외부 차트 라이브러리 없음)
 ├── types/                          # 공용 타입 (Transaction, Report, Plan 등)
 ├── lib/
-│   ├── statement/                  # 디코딩, 파싱, 마스킹, 정규화, 중복 키 (순수 함수)
+│   ├── statement/                  # 디코딩, 파싱, PDF 표 복원(pdf.ts), 마스킹, 정규화, 중복 키 (순수 함수)
 │   ├── aggregate/                  # 카테고리 합계, 월별 집계, 증감률 (순수 함수)
 │   ├── plan.ts                     # 플랜별 한도(Free 3, Pro 30)와 리포트 모델, KST 월 경계
 │   ├── categories.ts               # 고정 카테고리 10개 (단일 출처)
@@ -67,7 +67,7 @@ supabase/
 - **플랜 읽기**: 대시보드 layout·page와 `/api/checkout`은 `lib/supabase/session-plan`의 `getSessionPlan()`으로 세션과 `profiles.plan`을 읽는다. React `cache`로 감싸 같은 요청 안에서는 한 번만 조회한다. 로그인하지 않았으면 `null`, 플랜을 읽지 못하면 오류를 던져 `error.tsx`가 받는다.
 - **순수 함수**: 파일 처리와 집계 로직은 `lib/`의 순수 함수로 만들고 단위 테스트로 검증한다. 라우트 핸들러는 이 함수들을 조합만 한다.
 - **숫자는 코드, 해석은 AI**: 합계·건수·증감률은 `lib/aggregate`가 계산한다. AI 리포트는 거래를 id로 참조하고, 그 id를 날짜·가맹점·금액으로 바꾸는 것은 코드가 한다.
-- **런타임**: `api/analyze`는 Node.js 런타임에서 돌린다(SheetJS와 EUC-KR 디코딩 때문). `maxDuration`은 Vercel 플랜 한도 안에서 크게 잡는다.
+- **런타임**: `api/analyze`는 Node.js 런타임에서 돌린다(SheetJS, EUC-KR 디코딩, unpdf(pdf.js) 때문). `maxDuration`은 Vercel 플랜 한도 안에서 크게 잡는다.
 
 ## 데이터 모델 (Supabase Postgres)
 | 테이블 | 주요 컬럼 | 접근 |
@@ -86,9 +86,10 @@ supabase/
 ```
 1. 세션 확인(401) → 형식·크기 확인(4MB, `lib/upload.ts`. Vercel 요청 본문 한도 4.5MB 안쪽)
 2. 한도 확인: profiles.plan과 이번 달 usage.count를 읽어 한도 이상이면 중단 (한도 확인은 여기 한 곳). 이때 읽은 plan으로 리포트 모델도 정한다
-3. 파일 읽기: xls/xlsx는 SheetJS, CSV는 UTF-8(fatal) 실패 시 EUC-KR로 읽어 SheetJS 파싱
+3. 파일 읽기: xls/xlsx는 SheetJS, CSV는 UTF-8(fatal) 실패 시 EUC-KR로 읽어 SheetJS 파싱,
+   PDF는 unpdf로 글자 조각과 좌표를 뽑아 쪽마다 행·열을 복원(lib/statement/pdf.ts, 글자가 없으면 unsupported_file)
    → 상단 10행 마스킹(6자리 이상 숫자) → claude.mapColumns (Haiku)
-   → lib/statement 정규화(날짜, 원 단위 정수, 날짜·금액을 못 읽은 행은 제외 카운트)
+   → lib/statement 정규화(날짜, 원 단위 정수. 날짜를 못 읽은 행은 건너뛰고, 날짜는 있지만 가맹점·금액을 못 읽은 행은 제외 카운트)
    → 3,000건 초과·0건이면 중단
 4. 중복 확인: 파일 기간의 기존 거래 키를 조회해 새 거래만 골라낸다(lib/statement 순수 함수). 새 거래가 0건이면 "이미 분석한 파일"로 중단
 5. 분류: 고유 가맹점명을 200개씩 나눠 claude.classifyMerchants (Haiku, 병렬)

@@ -12,7 +12,7 @@ export const maxDuration = 300;
 
 const messages = {
   unauthorized: ["로그인이 필요해요.", "Google 계정으로 다시 로그인해 주세요."],
-  unsupported_file: ["지원하지 않는 파일이에요.", "CSV, xls, xlsx 파일 하나를 올려 주세요. 암호가 걸린 엑셀은 지원하지 않아요."],
+  unsupported_file: ["지원하지 않는 파일이에요.", "CSV, xls, xlsx, PDF 파일 하나를 올려 주세요. 암호가 걸린 파일과 스캔한 PDF는 지원하지 않아요."],
   file_too_large: ["파일이 4MB를 넘어요.", "4MB 이하의 파일을 올려 주세요."],
   too_many_rows: ["거래가 3,000건을 넘어요.", "기간을 나누어 파일을 올려 주세요."],
   columns_not_found: ["날짜·가맹점·금액 열을 찾지 못했어요.", "카드사에서 받은 원본 파일인지 확인해 주세요."],
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     if (usageError) throw new Error();
     if ((usage?.count ?? 0) >= getMonthlyLimit(plan)) return failure("quota_exceeded", 429);
 
-    const rows = parseStatement(await file.arrayBuffer(), file.name);
+    const rows = await parseStatement(await file.arrayBuffer(), file.name);
     const mapping = await mapColumns(maskTopRows(rows));
     if (!mapping) return failure("columns_not_found");
     const { transactions, excludedCount } = normalizeRows(rows, mapping);

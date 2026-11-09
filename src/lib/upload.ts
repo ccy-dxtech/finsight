@@ -2,7 +2,7 @@
 const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
 export function checkUploadFile({ name, size }: { name: string; size: number }): "unsupported_file" | "file_too_large" | null {
-  if (!/\.(csv|xls|xlsx)$/i.test(name)) return "unsupported_file";
+  if (!/\.(csv|xls|xlsx|pdf)$/i.test(name)) return "unsupported_file";
   if (size > MAX_UPLOAD_BYTES) return "file_too_large";
   return null;
 }

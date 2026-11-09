@@ -20,7 +20,7 @@ export function UploadDropzone() {
     setError("");
     const fileError = files.length === 1 ? checkUploadFile(files[0]) : "unsupported_file";
     if (fileError === "unsupported_file") {
-      setError("**지원하지 않는 파일이에요.** CSV, xls, xlsx 파일 하나를 올려 주세요. 횟수는 차감되지 않았어요.");
+      setError("**지원하지 않는 파일이에요.** CSV, xls, xlsx, PDF 파일 하나를 올려 주세요. 횟수는 차감되지 않았어요.");
       return;
     }
     if (fileError === "file_too_large") {
@@ -57,8 +57,8 @@ export function UploadDropzone() {
       >
         <span className="inline-flex size-12 items-center justify-center rounded-full bg-primary-soft text-primary"><Upload size={24} strokeWidth={1.5} aria-hidden="true" /></span>
         <span className="text-title-sm text-ink">카드 명세서를 끌어다 놓거나 선택하세요</span>
-        <span className="text-body-sm text-muted">CSV, xls, xlsx · 한 번에 한 파일 · 최대 4MB · 3,000건</span>
-        <input className="sr-only" type="file" accept=".csv,.xls,.xlsx" onChange={(event) => { void analyze(event.target.files); event.target.value = ""; }} />
+        <span className="text-body-sm text-muted">CSV, xls, xlsx, PDF · 한 번에 한 파일 · 최대 4MB · 3,000건</span>
+        <input className="sr-only" type="file" accept=".csv,.xls,.xlsx,.pdf" onChange={(event) => { void analyze(event.target.files); event.target.value = ""; }} />
       </label>
       {error && <Notice variant="error">{message ? <><strong>{message[1]}</strong> {message[2]}</> : error}</Notice>}
     </div>

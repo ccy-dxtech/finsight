@@ -52,6 +52,51 @@ export function statementCsv(rows: Row[]): Buffer {
   return Buffer.from([header, ...lines].join("\r\n") + "\r\n", "utf8");
 }
 
+// 카드 A와 같은 거래를 이용내역 조회 화면을 인쇄한 PDF로 만든 것(tests/fixtures/pdf/generate.mjs).
+export const CARD_A_PDF_FILE_NAME = "card-a-history.pdf";
+
+// 카드 B: 2쪽짜리 청구서형 PDF. 머리말, 다른 열 순서, 2026.11.02 날짜, '원'이 붙은 금액, 할부 열,
+// 2쪽 머리행 반복, 쪽 번호, 합계 행이 들어간다. months가 있으면 할부(이번 달 결제금액 = 이용금액 / months).
+export const CARD_B_PDF_FILE_NAME = "card-b-statement.pdf";
+
+export const CARD_B_ROWS: { date: string; merchant: string; krw: number | null; months?: number }[] = [
+  { date: "2026.11.02", merchant: "GS25 역삼점", krw: 3_200 },
+  { date: "2026.11.03", merchant: "스타벅스 강남점", krw: 6_500 },
+  { date: "2026.11.03", merchant: "넷플릭스", krw: 17_000 },
+  { date: "2026.11.04", merchant: "카카오T 택시", krw: 15_400 },
+  { date: "2026.11.06", merchant: "쿠팡", krw: 32_900 },
+  { date: "2026.11.07", merchant: "맥도날드 역삼점", krw: 9_800 },
+  { date: "2026.11.10", merchant: "삼성전자 강남점", krw: 1_290_000, months: 3 }, // 할부, 이상 지출 후보
+  { date: "2026.11.14", merchant: "KT 통신요금", krw: 49_000 },
+  { date: "2026.11.15", merchant: "유튜브프리미엄", krw: 14_900 },
+  { date: "2026.11.16", merchant: "다이소 강남점", krw: 7_000 },
+  { date: "2026.11.17", merchant: "배달의민족", krw: 24_000 },
+  { date: "2026.11.18", merchant: "온누리약국 역삼점", krw: 8_700 },
+  // 여기부터 2쪽
+  { date: "2026.11.19", merchant: "메가박스 코엑스", krw: 28_000 },
+  { date: "2026.11.20", merchant: "AMAZON.COM", krw: null }, // 원화 미확정 해외결제 → 제외
+  { date: "2026.11.21", merchant: "쿠팡", krw: -32_900 }, // 11-06 쿠팡 취소
+  { date: "2026.11.22", merchant: "교보문고 광화문점", krw: 21_000 },
+  { date: "2026.11.24", merchant: "이디야커피 역삼점", krw: 4_500 },
+  { date: "2026.11.25", merchant: "GS칼텍스 역삼주유소", krw: 60_000 },
+  { date: "2026.11.27", merchant: "올리브영 강남점", krw: 18_600 },
+  { date: "2026.11.28", merchant: "스타벅스 강남점", krw: 5_900 },
+  { date: "2026.11.29", merchant: "쿠팡이츠", krw: 19_800 },
+];
+export const CARD_B_FIRST_PAGE_ROWS = 12;
+
+// 포함 20건 합계: 3,200 + 6,500 + 17,000 + 15,400 + 32,900 + 9,800 + 1,290,000 + 49,000 + 14,900
+//   + 7,000 + 24,000 + 8,700 + 28,000 − 32,900 + 21,000 + 4,500 + 60,000 + 18,600 + 5,900 + 19,800 = 1,603,300
+// 할부는 이용일에 전체 금액으로 잡는다(이번 달 결제금액 430,000원이 아님).
+// 2쪽 반복 머리행·쪽 번호·합계 행·안내문은 날짜가 없어 거래도 제외 건수도 아니다.
+export const CARD_B_EXPECTED = {
+  totalAmount: 1_603_300,
+  total: "1,603,300원",
+  count: "20건",
+  period: "11.02–11.29",
+  excluded: "1건",
+};
+
 // 날짜·가맹점·금액으로 볼 수 있는 열이 없는 CSV.
 export function noColumnsCsv(): Buffer {
   return Buffer.from(["메모,내용", "장보기 목록,우유와 계란", "할 일,방 청소하기", "읽을 책,소설 한 권"].join("\r\n"), "utf8");

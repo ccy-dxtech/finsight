@@ -5,14 +5,14 @@ import { noColumnsCsv } from "./support/statement";
 test.describe("S4. 잘못된 파일 올리기", () => {
   test.beforeEach(async () => { await resetUser(e2eUser("a"), { plan: "free", used: 0 }); });
 
-  test("PDF와 4MB 초과 파일은 서버에 보내지 않고 바로 안내한다", async ({ page, loginAs }) => {
+  test("한글(hwp) 파일과 4MB 초과 파일은 서버에 보내지 않고 바로 안내한다", async ({ page, loginAs }) => {
     await loginAs("a");
     const analyzeRequests: string[] = [];
     page.on("request", (request) => { if (request.url().includes("/api/analyze")) analyzeRequests.push(request.url()); });
     await page.goto("/dashboard");
     const input = page.locator('input[type="file"]');
 
-    await input.setInputFiles({ name: "statement.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4") });
+    await input.setInputFiles({ name: "statement.hwp", mimeType: "application/x-hwp", buffer: Buffer.from("HWP Document File") });
     await expect(appAlert(page)).toContainText("지원하지 않는 파일이에요.");
 
     await input.setInputFiles({ name: "big.csv", mimeType: "text/csv", buffer: Buffer.alloc(4 * 1024 * 1024 + 1, "a") });

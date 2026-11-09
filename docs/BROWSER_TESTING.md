@@ -59,7 +59,7 @@ macOS·Linux에서는 `"command": "npx"`로 바꾸고 args의 `"/c"`, `"npx"`를
 - Playwright MCP는 `--isolated`라 항상 로그인 안 된 상태로 시작한다. Google OAuth 로그인은 자동화하지 않는다.
 - E2E도 최대화 창으로 돈다(`playwright.config.ts`의 `headless: false`, `viewport: null`, `--start-maximized`). 테스트마다 새 창이 떴다 닫힌다.
 - `/dashboard` 아래 화면은 해당 E2E 시나리오로 확인한다. 예: `npx playwright test tests/e2e/s6-free-locked.spec.ts`. E2E는 테스트 계정 세션 쿠키로 로그인하고, 실패하면 `test-results/`에 스크린샷과 trace를 남긴다(`npx playwright show-report`로 열기).
-- E2E는 `.env.local`이 있어야 한다. service role로 테스트 계정을 만들고 끝나면 지운다. S2·S3·S4는 실제 Claude API를 호출하므로 비용이 든다. 비용 없이 보호된 화면만 확인할 때는 `npx playwright test s1 s5 s6 s7 s8 s9`로 돌린다(S5는 한도 검사에서 막혀 Claude를 부르지 않는다).
+- E2E는 `.env.local`이 있어야 한다. service role로 테스트 계정을 만들고 끝나면 지운다. S2·S3·S4·S10은 실제 Claude API를 호출하므로 비용이 든다. 비용 없이 보호된 화면만 확인할 때는 `npx playwright test s1- s5 s6 s7 s8 s9`로 돌린다(S5는 한도 검사에서 막혀 Claude를 부르지 않는다). 인자는 파일 경로 정규식이라 `s1`이라고 쓰면 `s10`도 돈다.
 
 ## `.env.local` 없이 공개 화면만 볼 때
 Supabase 클라이언트는 URL·키가 없으면 오류를 내서 랜딩부터 열리지 않는다. 랜딩(`/`)과 `/login`만 볼 때는 가짜 값으로 띄워도 된다. 세션 쿠키가 없으면 Supabase에 요청하지 않으므로 화면은 정상으로 뜬다.

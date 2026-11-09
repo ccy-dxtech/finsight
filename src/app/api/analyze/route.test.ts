@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { POST } from "./route";
 import { classifyMerchants, mapColumns, writeReport } from "@/services/claude";
@@ -6,7 +7,7 @@ const db = vi.hoisted(() => ({ auth: { getUser: vi.fn() }, from: vi.fn(), rpc: v
 vi.mock("@/lib/supabase/server", () => ({ createServerClient: vi.fn(async () => db) }));
 vi.mock("@/services/claude", () => ({ mapColumns: vi.fn(), classifyMerchants: vi.fn(), writeReport: vi.fn() }));
 
-const csv = "날짜,가맹점,금액,카드번호,이름\n20261003,식당,12500,1234567890123456,비밀이름\n20261004,카페,-2500,1234567890123456,비밀이름\n잘못된날짜,가게,100,,";
+const csv = "날짜,가맹점,금액,카드번호,이름\n20261003,식당,12500,1234567890123456,비밀이름\n20261004,카페,-2500,1234567890123456,비밀이름\n20261005,금액없는가게,금액없음,,";
 let plan: string;
 let count: number | null;
 let existing: { occurred_on: string; merchant: string; amount: string }[];
@@ -72,11 +73,32 @@ it("전체 거래로 리포트를 만들고 신규 거래만 원자적으로 저
   expect(payload.p_report.insights.recurring[0].transactions).toHaveLength(2);
   expect(payload.p_report.insights.anomalies).toEqual([{ transaction: { id: 3, occurredOn: "2026-10-04", merchant: "카페", amount: "-2500", category: "기타" }, reason: "환불이 있어요." }]);
   const stored = JSON.stringify(payload);
-  for (const secret of [csv, "1234567890123456", "비밀이름", "카드번호", "잘못된날짜"]) expect(stored).not.toContain(secret);
+  for (const secret of [csv, "1234567890123456", "비밀이름", "카드번호", "금액없는가게"]) expect(stored).not.toContain(secret);
   expect(queries.map(({ table }) => table)).toEqual(["profiles", "usage", "transactions"]);
   expect(queries[1].filters).toContainEqual(["month", "2026-11-01"]);
   expect(queries[2].filters).toEqual(expect.arrayContaining([["user_id", "user-1"], ["gte", "occurred_on", "2026-10-03"], ["lte", "occurred_on", "2026-10-04"]]));
   expect(JSON.stringify(vi.mocked(mapColumns).mock.calls)).not.toContain("1234567890123456");
+});
+
+it("PDF 명세서도 같은 흐름으로 분석하고 원본 머리말은 저장하지 않는다", async () => {
+  const pdf = readFileSync(new URL("../../../../tests/fixtures/pdf/card-b-statement.pdf", import.meta.url));
+  const form = new FormData();
+  form.append("file", new File([pdf], "card-b-statement.pdf", { type: "application/pdf" }));
+  vi.mocked(mapColumns).mockResolvedValue({ headerRowIndex: 3, dateCol: 1, merchantCol: 0, amountCol: 2 });
+  vi.mocked(writeReport).mockResolvedValue({ summary: "지출을 살펴봤어요.", recurring: [], anomalies: [], savingTips: [] });
+
+  const response = await POST(new Request("http://localhost/api/analyze", { method: "POST", body: form }));
+  expect(response.status).toBe(200);
+  const masked = vi.mocked(mapColumns).mock.calls[0][0];
+  expect(masked).toHaveLength(10);
+  expect(masked[3]).toEqual(["이용하신 곳", "이용일", "이용금액", "할부", "이번 달 결제금액"]);
+  const [, payload] = db.rpc.mock.calls[0];
+  expect(payload.p_report).toMatchObject({
+    file_name: "card-b-statement.pdf", period_start: "2026-11-02", period_end: "2026-11-29",
+    transaction_count: 20, excluded_count: 1, totals: { totalAmount: "1603300" },
+  });
+  expect(payload.p_transactions).toHaveLength(20);
+  expect(JSON.stringify(payload)).not.toMatch(/홍길동|합계|AMAZON/);
 });
 
 it("로그인이 없으면 401이며 AI·DB 쓰기를 하지 않는다", async () => {
@@ -87,7 +109,7 @@ it("로그인이 없으면 401이며 AI·DB 쓰기를 하지 않는다", async (
 
 it.each(["unsupported_file", "file_too_large", "columns_not_found", "too_many_rows", "no_transactions", "already_analyzed", "quota_exceeded", "ai_failed"])("%s 오류에서는 저장·차감하지 않는다", async (code) => {
   let content = csv; let name = "카드.csv";
-  if (code === "unsupported_file") name = "카드.pdf";
+  if (code === "unsupported_file") name = "카드.hwp";
   if (code === "file_too_large") content = "a".repeat(4 * 1024 * 1024 + 1);
   if (code === "columns_not_found") vi.mocked(mapColumns).mockResolvedValue(null);
   if (code === "too_many_rows") content = "날짜,가맹점,금액\n" + "20261003,가게,1\n".repeat(3001);

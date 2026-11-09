@@ -1,6 +1,6 @@
 ---
 name: e2e
-description: FinSight Playwright E2E 시나리오(tests/e2e/s1~s9)를 실행 전 점검부터 결과 해석까지 수행한다. 화면 흐름·업로드·결제·삭제 동작을 바꾼 뒤 "E2E 돌려줘", "시나리오 확인", "사용자 여정 검증"을 요청받았을 때, 또는 harness step의 AC에 E2E가 있을 때 쓴다.
+description: FinSight Playwright E2E 시나리오(tests/e2e/s1~s10)를 실행 전 점검부터 결과 해석까지 수행한다. 화면 흐름·업로드·결제·삭제 동작을 바꾼 뒤 "E2E 돌려줘", "시나리오 확인", "사용자 여정 검증"을 요청받았을 때, 또는 harness step의 AC에 E2E가 있을 때 쓴다.
 ---
 
 # E2E 실행
@@ -36,7 +36,7 @@ description: FinSight Playwright E2E 시나리오(tests/e2e/s1~s9)를 실행 전
 
 - 시나리오 하나: `npx playwright test tests/e2e/s5-quota.spec.ts`
 - 전체: `npm run test:e2e`
-- `s2-upload-report.spec.ts`는 실제 Claude API를 호출해 비용이 든다. 업로드·분석을 바꾸지 않았으면 이 파일은 빼고, 바뀐 동작에 해당하는 시나리오 파일만 지정해 돌린다.
+- `s2-upload-report.spec.ts`, `s10-pdf-upload.spec.ts`(PDF 2개)는 실제 Claude API를 호출해 비용이 든다. 업로드·분석을 바꾸지 않았으면 이 파일들은 빼고, 바뀐 동작에 해당하는 시나리오 파일만 지정해 돌린다. 파일 인자는 경로 정규식이라 `s1`은 `s10`도 잡으니 `s1-`로 쓴다.
 - global-setup이 실제 Supabase 프로젝트에 `e2e-a@finsight.test`, `e2e-b@finsight.test` 계정을 지우고 새로 만든다. global-teardown이 정리한다. 시나리오는 한 번에 하나씩 순서대로 돈다(workers 1).
 - dev 서버 첫 컴파일 때문에 첫 테스트가 느릴 수 있다(webServer 대기 180초).
 

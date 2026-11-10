@@ -55,7 +55,7 @@ if ($c) { (Get-CimInstance Win32_Process -Filter "ProcessId=$($c.OwningProcess)"
 | Supabase | 마이그레이션 적용됨(2026-11-08 E2E S1·S5~S9 통과, `docs/BROWSER_TESTING.md`). Supabase CLI는 쓰지 않는다(`supabase/config.toml` 없음) |
 | Claude API | 키와 모델 ID 3개 확인됨(아래 "Claude API" 명령) |
 | Polar | `.env.local`의 `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, `POLAR_PRO_PRODUCT_ID`가 비어 있다. 결제·포털·웹훅은 아직 실제로 돌려 보지 않았다 |
-| Vercel | 아직 연결하지 않았다(`.vercel/` 없음, CLI 미설치) |
+| Vercel | 배포됨. 팀 `rainday1`(Hobby)의 프로젝트 `finsight`, GitHub `ccy-dxtech/finsight` 연동(main push → 프로덕션 자동 배포). 공개 주소 `https://finsight-silk-nu.vercel.app`. 환경 변수는 Production에만 있고 Polar 3개는 비어 있다(웹훅은 500). Supabase Redirect URLs 등록은 아래 "Vercel 배포"를 본다 |
 
 ## 상황별 바로가기
 | 상황 | 볼 곳 |
@@ -235,20 +235,37 @@ node -e "process.loadEnvFile('.env.local'); fetch('https://api.anthropic.com/v1/
 - 모델 목록 조회라 토큰 비용이 들지 않는다. 실제 분석(E2E S2·S3·S4·S10)은 비용이 든다.
 
 ## Vercel 배포
-아직 연결하지 않았다. 아래는 처음 배포할 때의 순서이고, 이 저장소에서 실행해 본 적은 없다.
+2026-11-10에 처음 배포했다. GitHub 연동이라 `main`에 push하면 프로덕션이 자동으로 다시 배포된다. 평소에는 CLI 배포(`npx vercel --prod`)를 쓰지 않는다. CLI는 커밋하지 않은 로컬 파일까지 올린다.
+
+| 항목 | 값 |
+|---|---|
+| 팀 / 프로젝트 | `rainday1` / `finsight` (Hobby) |
+| 공개 주소(`NEXT_PUBLIC_SITE_URL`) | `https://finsight-silk-nu.vercel.app` |
+| 대시보드 | `https://vercel.com/rainday1/finsight` |
+
+- `finsight-rainday1.vercel.app`과 배포마다 생기는 `finsight-<해시>-rainday1.vercel.app`은 Vercel 로그인을 요구한다(Deployment Protection). 사용자에게는 공개 주소만 쓴다.
+- 로그인 계정은 `npx vercel whoami`로 확인한다.
+
 ```powershell
-npx vercel login
-npx vercel link                                     # 프로젝트 연결, .vercel/ 생성
-npx vercel env add ANTHROPIC_API_KEY production     # 변수마다 반복, 값은 프롬프트에 붙여 넣는다
-npx vercel env ls                                   # 등록한 변수 이름 확인
-npx vercel --prod                                   # 프로덕션 배포
-npx vercel logs <배포 URL>                          # 런타임 로그(웹훅·분석 오류 확인)
+npx vercel whoami                                    # 로그인 계정 확인. Logged out이면 npx vercel login
+npx vercel ls finsight --scope rainday1              # 배포 목록과 상태(Building/Ready/Error)
+npx vercel env ls --scope rainday1                   # 등록한 변수 이름(값은 Hidden)
+npx vercel env add <이름> --environment production --scope rainday1   # 값은 프롬프트에 붙여 넣는다
+npx vercel redeploy <배포 URL> --target production --scope rainday1   # 변수를 바꾼 뒤 다시 빌드
+npx vercel logs https://finsight-silk-nu.vercel.app --scope rainday1 --since 30m --no-follow   # 런타임 로그
 ```
-- 넣을 변수는 `.env.example`의 이름 전부다. `NEXT_PUBLIC_SITE_URL`은 배포 도메인(`https://...`)으로 넣는다. `NEXT_PUBLIC_` 값은 빌드할 때 코드에 박히므로, 바꾸면 다시 배포한다.
-- 배포 뒤 함께 바꿀 곳
-  - Supabase Redirect URLs에 `https://<배포 도메인>/**` 추가.
-  - Polar 웹훅 URL을 배포 도메인으로 등록.
-  - `/api/analyze`의 `maxDuration = 300`이 Vercel 플랜 한도 안인지 확인(ADR-008).
+- `npx vercel login`은 터미널에서 직접 실행한다. "Visit https://vercel.com/oauth/device?user_code=..." 주소를 브라우저에서 승인하면 끝난다. 입력이 닫힌 환경(에이전트 셸)에서는 승인 전에 종료된다.
+- `vercel env add`는 기본으로 값을 Secret(대시보드에서 숨김, `env pull` 불가)으로 저장한다. `NEXT_PUBLIC_` 값은 `--type config`로 넣는다.
+- 넣을 변수는 `.env.example`의 이름 전부다. `NEXT_PUBLIC_SITE_URL`은 공개 주소로 넣는다. `NEXT_PUBLIC_` 값은 빌드할 때 코드에 박히므로, 바꾸면 다시 배포한다.
+- 변수는 Production에만 넣었다. 다른 브랜치·PR의 Preview 배포는 빌드는 되지만 변수가 없어 동작하지 않는다.
+- `vercel link`는 `.env.local` 끝에 `VERCEL_OIDC_TOKEN`을 덧붙인다. 앱은 쓰지 않는다.
+- GitHub 연동에는 Vercel 계정의 GitHub Login Connection이 필요하다. 없으면 `vercel link`가 `You need to add a Login Connection` 오류를 낸다. 프로젝트 Settings > Git에서 연결한다.
+- `POLAR_WEBHOOK_SECRET`이 없으면 웹훅이 `403`이 아니라 `500`(`Cannot read properties of undefined (reading 'length')`)을 돌려준다. 값을 넣고 다시 배포하면 `403`이 된다.
+- `/api/analyze`의 `maxDuration = 300`은 Hobby 한도 안이다(한도를 넘으면 Vercel 빌드가 실패한다, ADR-008).
+
+### 배포 뒤 함께 바꿀 곳
+- Supabase 대시보드 > Authentication > URL Configuration > Redirect URLs에 `https://finsight-silk-nu.vercel.app/**` 추가. 없으면 Google 로그인 뒤 Site URL(로컬 주소)로 돌아간다.
+- Polar 웹훅 URL을 `https://finsight-silk-nu.vercel.app/api/webhooks/polar`로 등록하고, Polar 값 3개를 Vercel 변수로 넣은 뒤 다시 배포한다(위 "Polar").
 
 ## E2E 테스트 계정
 E2E는 실제 Supabase 프로젝트에 `e2e-a@finsight.test`, `e2e-b@finsight.test`를 만들고, 끝나면 지운다. 다음 실행의 global-setup도 남은 계정을 지우고 새로 만든다.

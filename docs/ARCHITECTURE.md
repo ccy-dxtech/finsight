@@ -57,14 +57,14 @@ supabase/
 |---|---|
 | `/` | 헤더(로고 + 보조 `Button`) → `Hero` → `StepList`(`surface-soft` 띠) → `PricingTier`(`#pricing`) → 푸터 |
 | `/login` | 가운데 `Button`(Google, 큰 버튼) 하나 |
-| `/dashboard/*` 공통 | `AppHeader`(dashboard/layout.tsx) |
-| `/dashboard` | `UploadDropzone`(분석 중에는 그 자리에 `AnalyzingState`, 이번 달 횟수를 다 쓰면 그 자리에 `LockedPanel` 소진 카드) → `UsageMeter` → `ReportListItem` 목록 |
+| `/dashboard/*` 공통 | `AppSidebar`(dashboard/layout.tsx). 1024px 이상 왼쪽 사이드바(메뉴 + 플랜 카드), 그보다 좁으면 상단 바. `<header>`라 배너 랜드마크다 |
+| `/dashboard` | `UploadDropzone`(파일 선택 → "분석하기" 주요 버튼, 분석 중에는 그 자리에 `AnalyzingState`, 이번 달 횟수를 다 쓰면 그 자리에 `LockedPanel` 소진 카드) → `UsageMeter` → 플랜 카드(`SettingsRow` 한 줄, 무료가 횟수를 다 쓰면 두지 않음) → `CategoryBars`(이미 읽은 `reports` 중 가장 최근 행의 `totals`, 리포트가 없으면 안내 카드) → `ReportListItem` 목록 |
 | `/dashboard/reports/[id]` | `StatSummary` → `CategoryBars` → `InsightList`(정기결제·이상 지출) → `SavingTip` |
 | `/dashboard/trends` | 프로: `MonthlyChart` + `ChangeTable`(거래가 있는 가장 최근 달 vs 그 전달, 전달 거래가 없으면 표 대신 안내) / 무료: `LockedPanel` |
-| `/dashboard/settings` | `SettingsRow` 목록(플랜, 구독 관리, 데이터 삭제, 로그아웃) |
+| `/dashboard/settings` | `SettingsRow` 목록(플랜 + 배지: 무료는 "프로 구독하기", 프로는 "구독 관리" → Google 계정 이메일 + 로그아웃 → 데이터 삭제) |
 | 여러 화면 | `Button`, `Badge`, `Notice`(오류·결제 확인 중·결제 완료 안내) |
 - **서버 전용 모듈**: 외부 API와 비밀값을 쓰는 모듈(`services/`, service role 클라이언트)은 `import "server-only"`로 클라이언트 번들 유입을 막는다.
-- **플랜 읽기**: 대시보드 layout·page와 `/api/checkout`은 `lib/supabase/session-plan`의 `getSessionPlan()`으로 세션과 `profiles.plan`을 읽는다. React `cache`로 감싸 같은 요청 안에서는 한 번만 조회한다. 로그인하지 않았으면 `null`, 플랜을 읽지 못하면 오류를 던져 `error.tsx`가 받는다.
+- **플랜 읽기**: 대시보드 layout·page와 `/api/checkout`은 `lib/supabase/session-plan`의 `getSessionPlan()`으로 세션과 `profiles.plan`을 읽는다(설정 화면에 보여줄 로그인 이메일도 함께 돌려준다). React `cache`로 감싸 같은 요청 안에서는 한 번만 조회한다. 로그인하지 않았으면 `null`, 플랜을 읽지 못하면 오류를 던져 `error.tsx`가 받는다.
 - **순수 함수**: 파일 처리와 집계 로직은 `lib/`의 순수 함수로 만들고 단위 테스트로 검증한다. 라우트 핸들러는 이 함수들을 조합만 한다.
 - **숫자는 코드, 해석은 AI**: 합계·건수·증감률은 `lib/aggregate`가 계산한다. AI 리포트는 거래를 id로 참조하고, 그 id를 날짜·가맹점·금액으로 바꾸는 것은 코드가 한다.
 - **런타임**: `api/analyze`는 Node.js 런타임에서 돌린다(SheetJS, EUC-KR 디코딩, unpdf(pdf.js) 때문). `maxDuration`은 Vercel 플랜 한도 안에서 크게 잡는다.

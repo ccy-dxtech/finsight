@@ -31,6 +31,7 @@ test.describe("S10. PDF 명세서 업로드 (무료)", () => {
       await loginAs("a");
       await page.goto("/dashboard");
       await page.locator('input[type="file"]').setInputFiles(fileURLToPath(new URL(`../fixtures/pdf/${file}`, import.meta.url)));
+      await page.getByRole("button", { name: "분석하기" }).click();
       await expect(page.getByRole("status").getByText("분석 중이에요. 1~2분 걸릴 수 있어요")).toBeVisible();
 
       const outcome = await Promise.race([

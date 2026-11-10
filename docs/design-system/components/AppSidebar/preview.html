@@ -1,0 +1,38 @@
+<!-- @dsCard group="Navigation" height=420 -->
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><style>
+body { margin: 0; background: var(--surface-soft); font-family: var(--font-sans); }
+.shell { display: flex; height: 400px; }
+.fs-sidebar { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-xl); width: 240px; height: 100%;
+  padding: var(--space-lg) var(--space-base); background: var(--canvas); border-right: 1px solid var(--hairline); }
+.fs-sidebar .fs-logo { padding: 0 var(--space-sm); }
+.fs-sidebar__menu { display: flex; flex-direction: column; gap: var(--space-xxs); list-style: none; margin: 0; padding: 0; }
+.fs-sidebar__menu a { display: flex; align-items: center; gap: var(--space-sm); height: 44px; padding: 0 var(--space-sm);
+  border-radius: var(--radius-pill); color: var(--body); text-decoration: none; font-size: 15px; font-weight: 500; }
+.fs-sidebar__menu a[aria-current="page"] { background: var(--surface-strong); color: var(--ink); font-weight: 600; }
+.fs-sidebar__menu .ico { width: 20px; text-align: center; color: var(--body); }
+.fs-sidebar__menu .fs-badge { margin-left: auto; }
+.fs-sidebar__plan { margin-top: auto; padding: var(--space-base); border: 1px solid var(--hairline); border-radius: var(--radius-xl); }
+.fs-sidebar__plan-head { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--muted); }
+.main { flex: 1; padding: var(--space-xl); font-size: 26px; font-weight: 700; color: var(--ink); }
+</style></head>
+<body>
+<div class="shell">
+  <header class="fs-sidebar">
+    <a class="fs-logo" href="#">Fin<b>Sight</b></a>
+    <nav aria-label="대시보드">
+      <ul class="fs-sidebar__menu">
+        <li><a href="#" aria-current="page"><span class="ico">⌂</span>홈</a></li>
+        <li><a href="#"><span class="ico">▮</span>월별 추이 <span class="fs-badge fs-badge--lock">프로</span></a></li>
+        <li><a href="#"><span class="ico">⚙</span>설정</a></li>
+      </ul>
+    </nav>
+    <div class="fs-sidebar__plan">
+      <div class="fs-sidebar__plan-head">현재 플랜 <span class="fs-badge">무료</span></div>
+    </div>
+  </header>
+  <div class="main">대시보드</div>
+</div>
+</body>
+</html>

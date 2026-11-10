@@ -28,6 +28,7 @@ test.describe("S2·S3. 명세서 업로드부터 리포트까지 (무료)", () =
     await page.locator('input[type="file"]').setInputFiles({
       name: CARD_A_FILE_NAME, mimeType: "text/csv", buffer: statementCsv(CARD_A_ROWS),
     });
+    await page.getByRole("button", { name: "분석하기" }).click();
     await expect(page.getByRole("status").getByText("분석 중이에요. 1~2분 걸릴 수 있어요")).toBeVisible();
 
     // 성공하면 리포트 상세로 이동하고, 실패하면 오류 안내가 뜬다. 어느 쪽인지 먼저 가린다.
@@ -66,6 +67,7 @@ test.describe("S2·S3. 명세서 업로드부터 리포트까지 (무료)", () =
     await page.locator('input[type="file"]').setInputFiles({
       name: CARD_A_FILE_NAME, mimeType: "text/csv", buffer: statementCsv(CARD_A_ROWS),
     });
+    await page.getByRole("button", { name: "분석하기" }).click();
     const alert = appAlert(page);
     await expect(alert).toContainText("이미 분석한 파일이에요.", { timeout: 100_000 });
     await expect(alert).toContainText("횟수는 차감되지 않았어요.");

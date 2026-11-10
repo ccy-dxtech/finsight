@@ -15,6 +15,13 @@ test.describe("S8. 내 데이터 전체 삭제, 그다음 로그아웃", () => {
     const user = await loginAs("a");
     await page.goto("/dashboard");
     await expect(page.getByRole("listitem").filter({ hasText: FILE_NAME })).toHaveCount(1);
+    // 대시보드 한 화면에 분석하기, 플랜(프로 구독하기), 가장 최근 리포트의 카테고리별 지출이 함께 보인다.
+    await expect(page.getByRole("button", { name: "분석하기" })).toBeDisabled();
+    await expect(page.getByRole("link", { name: "프로 구독하기" })).toHaveAttribute("href", "/api/checkout");
+    const bars = page.locator("section").filter({ has: page.getByRole("heading", { name: "카테고리별 지출" }) });
+    await expect(bars).toContainText(FILE_NAME);
+    await expect(bars).toContainText("식비");
+    await expect(bars.getByRole("link", { name: "리포트 보기" })).toHaveAttribute("href", /\/dashboard\/reports\/[0-9a-f-]{36}$/);
 
     await page.getByRole("navigation", { name: "대시보드" }).getByRole("link", { name: "설정" }).click();
     await expect(page).toHaveURL(/\/dashboard\/settings$/);

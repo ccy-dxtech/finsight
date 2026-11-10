@@ -8,18 +8,23 @@ vi.mock("./server", () => ({ createServerClient: async () => ({ auth: { getUser 
 
 beforeEach(() => {
   vi.resetAllMocks();
-  getUser.mockResolvedValue({ data: { user: { id: "user-1" } }, error: null });
+  getUser.mockResolvedValue({ data: { user: { id: "user-1", email: "me@example.com" } }, error: null });
   from.mockReturnValue({ select });
   select.mockReturnValue({ eq });
   eq.mockReturnValue({ maybeSingle });
   maybeSingle.mockResolvedValue({ data: { plan: "pro" }, error: null });
 });
 
-it("세션 사용자의 profiles.plan을 돌려준다", async () => {
-  await expect(getSessionPlan()).resolves.toEqual({ userId: "user-1", plan: "pro" });
+it("세션 사용자의 profiles.plan과 로그인 이메일을 돌려준다", async () => {
+  await expect(getSessionPlan()).resolves.toEqual({ userId: "user-1", email: "me@example.com", plan: "pro" });
   expect(from).toHaveBeenCalledWith("profiles");
   expect(select).toHaveBeenCalledWith("plan");
   expect(eq).toHaveBeenCalledWith("id", "user-1");
+});
+
+it("이메일이 없는 계정은 email을 null로 돌려준다", async () => {
+  getUser.mockResolvedValue({ data: { user: { id: "user-1" } }, error: null });
+  await expect(getSessionPlan()).resolves.toEqual({ userId: "user-1", email: null, plan: "pro" });
 });
 
 it.each([

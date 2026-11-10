@@ -14,6 +14,7 @@ test.describe("S4. 잘못된 파일 올리기", () => {
 
     await input.setInputFiles({ name: "statement.hwp", mimeType: "application/x-hwp", buffer: Buffer.from("HWP Document File") });
     await expect(appAlert(page)).toContainText("지원하지 않는 파일이에요.");
+    await expect(page.getByRole("button", { name: "분석하기" })).toBeDisabled();
 
     await input.setInputFiles({ name: "big.csv", mimeType: "text/csv", buffer: Buffer.alloc(4 * 1024 * 1024 + 1, "a") });
     await expect(appAlert(page)).toContainText("파일이 4MB를 넘어요.");
@@ -30,6 +31,7 @@ test.describe("S4. 잘못된 파일 올리기", () => {
     await loginAs("a");
     await page.goto("/dashboard");
     await page.locator('input[type="file"]').setInputFiles({ name: "memo.csv", mimeType: "text/csv", buffer: noColumnsCsv() });
+    await page.getByRole("button", { name: "분석하기" }).click();
 
     // AI가 열을 못 찾으면 columns_not_found, 엉뚱한 열을 고르면 정규화에서 no_transactions가 된다. 둘 다 같은 단계의 실패다.
     const alert = appAlert(page);

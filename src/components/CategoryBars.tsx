@@ -1,16 +1,22 @@
+import type { ReactNode } from "react";
 import { formatNumber } from "@/lib/format";
 
 type CategoryBarsProps = {
   rows: { label: string; amount: bigint; ratio: number }[];
+  // 대시보드처럼 리포트 밖에서 보여줄 때, 어느 리포트의 지출인지 제목 아래에 적는다.
+  caption?: ReactNode;
 };
 
-export function CategoryBars({ rows }: CategoryBarsProps) {
+export function CategoryBars({ rows, caption }: CategoryBarsProps) {
   const sorted = rows.filter(({ amount }) => amount !== 0n)
     .sort((a, b) => a.amount > b.amount ? -1 : a.amount < b.amount ? 1 : 0);
   const max = sorted[0]?.amount ?? 0n;
   return (
     <section className="min-w-0 rounded-xl border border-hairline bg-canvas p-6 break-keep">
-      <h2 className="mb-4 text-title-md text-ink">카테고리별 지출</h2>
+      <div className="mb-4">
+        <h2 className="text-title-md text-ink">카테고리별 지출</h2>
+        {caption && <div className="mt-1 text-body-sm text-muted">{caption}</div>}
+      </div>
       <ul className="grid gap-3">
         {sorted.map(({ label, amount, ratio }) => (
           <li key={label} className="grid grid-cols-[1fr_auto_auto] items-center gap-3 text-body-sm sm:grid-cols-[96px_1fr_108px_44px]">

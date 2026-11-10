@@ -31,7 +31,7 @@ FinSight는 카드 명세서를 올리면 AI가 지출을 한국어 리포트로
 
 - 글꼴: **Pretendard Variable**(jsDelivr에서 `components/bundle.css`가 불러와요). 대체: Apple SD Gothic Neo, Noto Sans KR, 맑은 고딕.
 - 제목: 랜딩 히어로 `display-lg`(48/700), 랜딩 섹션 `display-md`, 대시보드 페이지 제목 `title-lg`, 카드 제목 `title-md`, 업로드·분석 문구 `title-sm`.
-- 본문: 히어로 부제 `body-lg`, 기본 `body-md`(줄간격 1.65), 보조 `body-sm`, 캡션 `caption`, 배지 `label`, 버튼 `button`, 헤더 탭 `nav-link`.
+- 본문: 히어로 부제 `body-lg`, 기본 `body-md`(줄간격 1.65), 보조 `body-sm`, 캡션 `caption`, 배지 `label`, 버튼 `button`, 사이드바 메뉴 `nav-link`.
 - 한글 제목은 굵게(700) 쓰고 자간을 살짝 좁혀요. 본문 자간은 0.
 - 모바일에서 히어로 제목은 32px.
 
@@ -54,10 +54,11 @@ FinSight는 카드 명세서를 올리면 AI가 지출을 한국어 리포트로
 
 - `/` 랜딩: 헤더(로고 + 보조 버튼, `AppHeader` 명세) → `Hero`(1280px 이상에서 오른쪽에 `Cover` 그림) → `StepList`(`surface-soft` 띠 위 흰 카드) → `PricingTier` → 푸터(`surface-soft`, 로고 + `caption`).
 - `/login`: 가운데 정렬. 로고(`/` 링크) → 한 문장(`body-lg`) → `fs-btn--google` 큰 버튼 하나.
-- `/dashboard`: `AppHeader` → `UploadDropzone` → `UsageMeter` → `ReportListItem` 목록.
+- `/dashboard/*` 공통: `AppSidebar`(1024px 이상 왼쪽 240px 사이드바, 그보다 좁으면 상단 바).
+- `/dashboard`: `UploadDropzone`(파일을 고른 뒤 "분석하기") → `UsageMeter` → 플랜(`SettingsRow` 한 줄, 무료는 보조 버튼 "프로 구독하기") → `CategoryBars`(가장 최근 리포트) → `ReportListItem` 목록.
 - `/dashboard/reports/[id]`: `StatSummary` → `CategoryBars` → `InsightList`(정기결제·이상 지출) → `SavingTip`.
 - `/dashboard/trends`: 프로 `MonthlyChart` + `ChangeTable`, 무료 `LockedPanel`.
-- `/dashboard/settings`: `SettingsRow` 목록.
+- `/dashboard/settings`: `SettingsRow` 목록(플랜 + 배지와 동작 → Google 계정·로그아웃 → 전체 삭제).
 
 ## 아이콘
 

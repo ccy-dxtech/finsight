@@ -1,7 +1,7 @@
 # 프로젝트: FinSight
 
 카드 명세서(CSV·엑셀)를 올리면 AI가 지출을 분석해 한국어 인사이트 리포트를 주는 구독형 웹앱. MVP·프로토타입 단계.
-기획은 `docs/PRD.md`, 구조는 `docs/ARCHITECTURE.md`, 결정 근거는 `docs/ADR.md`, 화면 규칙은 `docs/UI_GUIDE.md`, 사용자 여정·단계별 다음 행동은 `docs/UX_GUIDE.md`, 디자인 토큰·컴포넌트 명세는 `docs/design-system/`.
+기획은 `docs/PRD.md`, 구조는 `docs/ARCHITECTURE.md`, 결정 근거는 `docs/ADR.md`, 화면 규칙은 `docs/UI_GUIDE.md`, 사용자 여정·단계별 다음 행동은 `docs/UX_GUIDE.md`, 디자인 토큰·컴포넌트 명세는 `docs/design-system/`, 서버 운영 수동 명령(로컬 서버·Supabase SQL·Polar·Vercel)은 `docs/OPERATIONS.md`.
 
 ## 기술 스택
 - Next.js (App Router) + TypeScript strict mode

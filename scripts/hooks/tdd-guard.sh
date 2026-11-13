@@ -6,7 +6,7 @@
 # https://github.com/jha0313/codex-live-demo/blob/feat-0-mvp/.codex/hooks/tdd-guard.sh
 # (그 원본의 원본: jha0313/YOUTUBE harness_demo/scripts/hooks/tdd-guard.sh)
 #
-# 이 프로젝트에서 바꾼 점 (판정 규칙은 원본과 동일):
+# 이 프로젝트에서 바꾼 점 (판정 규칙은 원본과 같고, 예외 폴더 .claude/workflows/ 하나만 더했다):
 #   - 훅 입력 JSON을 argv가 아니라 stdin으로 Python에 넘긴다.
 #     원본은 큰 Write에서 "Argument list too long"으로 실패해 검사 없이 통과시켰다.
 #   - Windows 경로(C:\...)의 백슬래시를 /로 바꾼다.
@@ -18,6 +18,10 @@
 #     /.claude/worktrees/<이름>/... 이 되고 worktree 이름에 test·spec이 들어가면 가드가 꺼졌다.
 #     cwd가 없으면(예: Codex) 예전처럼 $CLAUDE_PROJECT_DIR → 현재 폴더의 git 루트 순서.
 #   - 입출력을 UTF-8 / ASCII 이스케이프 JSON으로 고정한다 (Windows 기본 인코딩 cp949 대비).
+#   - .claude/workflows/*.js(Claude Code 워크플로 스크립트)는 검사하지 않는다.
+#     agent()/pipeline() 같은 런타임 전역에 기대는 스크립트라 짝 테스트를 둘 수 없다.
+#     /.claude/ 전체를 빼지 않는 이유: cwd가 없는 fallback에서 worktree 파일의 상대경로가
+#     /.claude/worktrees/... 가 되어 가드가 꺼진다.
 #   - Codex apply_patch 입력(.tool_input.command의 *** Add/Update File:) 지원은 그대로 둔다.
 
 set -u
@@ -182,6 +186,13 @@ while IFS=$'\t' read -r action file_path; do
 
   case "$rel" in
     */layout.tsx|*/layout.ts|*/page.tsx|*/page.ts|*/loading.tsx|*/error.tsx|*/not-found.tsx|*/globals.css) continue ;;
+  esac
+
+  # Claude Code 워크플로 스크립트. /.claude/ 전체가 아니라 이 폴더만 뺀다(머리 주석 참고).
+  # 다른 규칙처럼 */로 시작한다. 드라이브 문자 대소문자(c: vs C:)가 달라 rel이 절대경로로
+  # 남거나, cwd 없는 fallback에서 rel이 /.claude/worktrees/<이름>/... 이어도 걸리게 하려는 것이다.
+  case "$rel" in
+    */.claude/workflows/*) continue ;;
   esac
 
   case "$rel" in

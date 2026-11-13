@@ -162,9 +162,9 @@ class TddGuardTest(HookTestCase):
         self.worktree = make_repo(self.main / ".claude" / "worktrees" / "fix-test-flake")
         (self.worktree / "src" / "lib").mkdir(parents=True)
 
-    def decision(self, path: Path) -> str:
+    def decision(self, path: Path, cwd: Path | None = None) -> str:
         payload = {
-            "hook_event_name": "PreToolUse", "tool_name": "Write", "cwd": str(self.worktree),
+            "hook_event_name": "PreToolUse", "tool_name": "Write", "cwd": str(cwd or self.worktree),
             "tool_input": {"file_path": str(path), "content": "export {};\n"},
         }
         result = run_hook("tdd-guard.sh", payload, cwd=self.tmp, CLAUDE_PROJECT_DIR=str(self.main))
@@ -179,6 +179,33 @@ class TddGuardTest(HookTestCase):
     def test_allows_file_with_sibling_test(self):
         (self.worktree / "src" / "lib" / "a.test.ts").write_text("", encoding="utf-8")
         self.assertEqual(self.decision(self.worktree / "src" / "lib" / "a.ts"), "allow")
+
+    def test_allows_claude_workflow_script(self):
+        # Claude Code 워크플로 스크립트는 agent()/pipeline() 전역에 기대어 단위 테스트를 붙일 수 없다.
+        path = self.worktree / ".claude" / "workflows" / "review-code.js"
+        self.assertEqual(self.decision(path), "allow")
+
+    def test_allows_claude_workflow_script_with_lowercase_drive(self):
+        # Claude Code는 cwd가 소문자 c:면 file_path도 c:로 넘기지만 git 루트는 C:로 나온다.
+        # 그러면 상대경로를 못 구해 절대경로 전체로 비교하는데, 경로에 test가 있으면 *test* 규칙에
+        # 걸려 무엇이든 통과한다(self.tmp는 hook-test-). 그래서 test가 없는 폴더에서 확인한다.
+        base = Path(tempfile.mkdtemp(prefix="hookcase-"))
+        self.addCleanup(remove_tree, base)
+        repo = make_repo(base / "repo")
+        if str(repo)[1:2] != ":":
+            self.skipTest("드라이브 문자가 있는 Windows 경로에서만 의미가 있다")
+
+        def lower_drive(path: Path) -> Path:
+            return Path(str(path)[0].lower() + str(path)[1:])
+
+        workflow = lower_drive(repo / ".claude" / "workflows" / "review-code.js")
+        untested = lower_drive(repo / "src" / "lib" / "a.ts")
+        self.assertEqual(self.decision(workflow, cwd=lower_drive(repo)), "allow")
+        self.assertEqual(self.decision(untested, cwd=lower_drive(repo)), "deny")  # 가드가 켜져 있다는 대조군
+
+    def test_still_blocks_untested_js_elsewhere_under_dot_claude(self):
+        path = self.worktree / ".claude" / "skills" / "x" / "run.js"
+        self.assertEqual(self.decision(path), "deny")
 
 
 if __name__ == "__main__":

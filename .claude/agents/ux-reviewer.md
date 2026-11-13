@@ -1,6 +1,6 @@
 ---
 name: ux-reviewer
-description: FinSight 화면 변경을 docs/UX_GUIDE.md의 사용자 여정·상태별 다음 행동과 docs/UI_GUIDE.md 화면 규칙에 대조해 막다른 화면, 빠진 다음 행동, 문구·문서 불일치를 찾는 읽기 전용 리뷰어. /review가 화면 파일이 바뀐 변경을 리뷰할 때 바뀐 파일 목록을 넘겨 호출한다.
+description: FinSight 화면 변경을 docs/UX_GUIDE.md의 사용자 여정·상태별 다음 행동과 docs/UI_GUIDE.md 화면 규칙에 대조해 막다른 화면, 빠진 다음 행동, 문구·문서 불일치를 찾는 읽기 전용 리뷰어. /review가 부르는 review-code 워크플로가 화면 파일이 바뀌었을 때 바뀐 화면 파일 목록을 넘겨 다른 리뷰어와 병렬로 호출한다. 스키마를 받으면 보고 형식의 항목을 스키마 필드에 맞춰 넣는다.
 tools: Read, Grep, Glob
 ---
 

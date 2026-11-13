@@ -145,7 +145,7 @@ npm test        # 테스트 통과
 ## 작업
 
 `git diff main...HEAD`로 이 phase의 변경 전체를 보고 `/.claude/commands/review.md`의 체크리스트로 리뷰해
-`phases/{task-name}/review.md`에 적는다.
+`phases/{task-name}/review.md`에 적는다. PR이 있어도 PR에 코멘트를 올리지 않는다.
 
 - 지적마다 심각도(P0: 출시를 막음, P1: 고쳐야 함, P2: 개선), `파일:줄`, 실패하는 상황, 수정 방향을 적는다.
 - `docs/UX_GUIDE.md` 점검 표에서 아직 열린 항목도 옮겨 적는다.

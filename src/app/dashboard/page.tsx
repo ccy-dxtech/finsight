@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/server";
 import { getSessionPlan } from "@/lib/supabase/session-plan";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getKstMonthStart, getMonthlyLimit } from "@/lib/plan";
 import { UploadDropzone } from "@/components/UploadDropzone";
 import { LockedPanel } from "@/components/LockedPanel";
@@ -25,11 +26,17 @@ export default async function Dashboard({ searchParams }: {
   const limit = getMonthlyLimit(session.plan);
   const used = usageResult.data?.count ?? 0;
   const { checkout } = await searchParams;
+  // 웹훅이 늦게 와도 결제 직후 바로 프로 기능을 쓸 수 있게 한다.
+  let plan = session.plan;
+  if (checkout === "success" && plan === "free") {
+    await createAdminClient().from("profiles").update({ plan: "pro" }).eq("id", session.userId);
+    plan = "pro";
+  }
 
   return (
     <main className="mx-auto grid max-w-[960px] gap-6 break-keep px-8 py-8">
       <h1 className="text-title-lg text-ink">대시보드</h1>
-      {checkout === "success" && (session.plan === "pro"
+      {checkout === "success" && (plan === "pro"
         ? <Notice variant="success"><strong>프로 구독을 시작했어요.</strong> 이제 월별 추이를 볼 수 있어요.<div><Button variant="text" href="/dashboard/trends">월별 추이 보기</Button></div></Notice>
         : <Notice><strong>결제 확인 중이에요.</strong> 잠시 뒤 새로고침해 주세요. 결제가 확인되면 프로 플랜으로 표시돼요.</Notice>)}
       {used >= limit ? <LockedPanel reason="quota" plan={session.plan} /> : <UploadDropzone />}

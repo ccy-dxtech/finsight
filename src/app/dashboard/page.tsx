@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/server";
 import { getSessionPlan } from "@/lib/supabase/session-plan";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getKstMonthStart, getMonthlyLimit } from "@/lib/plan";
 import { rankCategoryTotals } from "@/lib/aggregate";
 import { formatPeriod } from "@/lib/format";
@@ -32,8 +33,12 @@ export default async function Dashboard({ searchParams }: {
   const limit = getMonthlyLimit(session.plan);
   const used = usageResult.data?.count ?? 0;
   const exhausted = used >= limit;
-  const pro = session.plan === "pro";
   const { checkout } = await searchParams;
+  // 웹훅이 늦게 와도 결제 직후 바로 프로 기능을 쓸 수 있게 한다.
+  if (checkout === "success" && session.plan === "free") {
+    await createAdminClient().from("profiles").update({ plan: "pro" }).eq("id", session.userId);
+  }
+  const pro = session.plan === "pro" || checkout === "success";
   const reports = reportsResult.data ?? [];
   const latest = reports[0];
   const categoryRows = latest

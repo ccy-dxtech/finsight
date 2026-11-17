@@ -117,7 +117,7 @@ GATE: critical=0 major=1 minor=2 nit=1
 
 ### S. 일반 웹 취약점 — security / 아래 정규화 표
 
-R1~R7에 걸리지 않는 보안 문제는 Claude Code 공식 플러그인 `security-guidance`(Apache-2.0)의 취약점 분류 중 FinSight에 해당하는 아래 항목으로 본다. diff 단위로만 본다. 코드베이스 전체 스캔은 이 리뷰의 범위가 아니다.
+R1~R10에 걸리지 않는 보안 문제는 Claude Code 공식 플러그인 `security-guidance`(Apache-2.0)의 취약점 분류 중 FinSight에 해당하는 아래 항목으로 본다. diff 단위로만 본다. 코드베이스 전체 스캔은 이 리뷰의 범위가 아니다.
 
 | 분류 | FinSight 탐지 신호 |
 |---|---|
@@ -134,7 +134,7 @@ R1~R7에 걸리지 않는 보안 문제는 Claude Code 공식 플러그인 `secu
 | GitHub Actions 위험 | `${{ github.event.pull_request.title }}` 같은 PR 값을 `run:`에 직접 삽입. 서드파티 action을 SHA가 아닌 태그로 고정 |
 | 위험한 자원 소모 | 업로드·파싱에 쪽 수·행 수·크기 상한이 없어 한 요청이 서버를 오래 점유 |
 
-플러그인 등급을 이 파일의 4단계로 바꾸는 표. R1~R7에 해당하면 그 룰의 심각도가 우선한다.
+플러그인 등급을 이 파일의 4단계로 바꾸는 표. R1~R10에 해당하면 그 룰의 심각도가 우선한다.
 
 | 플러그인 | 이 파일 | 기준 |
 |---|---|---|

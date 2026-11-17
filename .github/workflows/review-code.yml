@@ -51,7 +51,12 @@ jobs:
             --model sonnet \
             --no-session-persistence \
             --allowedTools "Read" "Grep" "Glob" "Agent" "Bash(gh pr diff:*)" "Bash(gh pr view:*)" "Bash(git rev-parse:*)" \
-            > review-output.md || echo "claude -p가 실패했어요(exit $?)." >&2
+            --output-format stream-json --verbose \
+            > review-stream.jsonl || echo "claude -p가 실패했어요(exit $?)." >&2
+          jq -r 'select(.type=="result") | .result // empty' review-stream.jsonl > review-output.md
+          # 로그에 남기는 관측값: 도구별 호출 수(서브에이전트 포함)와 비용·턴·시간
+          jq -r 'select(.type=="assistant") | .message.content[]? | select(.type=="tool_use") | .name' review-stream.jsonl | sort | uniq -c
+          jq -r 'select(.type=="result") | "cost_usd=\(.total_cost_usd) turns=\(.num_turns) duration_ms=\(.duration_ms)"' review-stream.jsonl
           cat review-output.md
 
       - name: Post review

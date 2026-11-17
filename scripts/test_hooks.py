@@ -181,5 +181,101 @@ class TddGuardTest(HookTestCase):
         self.assertEqual(self.decision(self.worktree / "src" / "lib" / "a.ts"), "allow")
 
 
+# 진짜 claude 대신 PATH 맨 앞에 두는 가짜. 받은 인자를 FAKE_CLAUDE_ARGS에 적고 FAKE_CLAUDE_OUTPUT을 출력한다.
+FAKE_CLAUDE = """\
+#!/usr/bin/env bash
+printf '%s\\n' "$@" > "$FAKE_CLAUDE_ARGS"
+printf '%s\\n' "$FAKE_CLAUDE_OUTPUT"
+exit "${FAKE_CLAUDE_EXIT:-0}"
+"""
+
+REVIEW_OUTPUT = """\
+## review-code 요약
+판정: {verdict}
+
+GATE: critical={c} major={m} minor={n} nit={t}
+
+### src/a.ts:1
+[🟡 minor] 예시 지적
+
+```json
+{{"verdict": "{verdict}"}}
+```"""
+
+
+class PreCommitReviewTest(HookTestCase):
+    """git pre-commit에서 staged 변경을 /review-code --staged로 리뷰하고 GATE 줄로 통과·차단을 정한다."""
+
+    def setUp(self):
+        super().setUp()
+        self.repo = make_repo(self.tmp / "repo")
+        (self.repo / "a.txt").write_text("v1", encoding="utf-8")
+        git(self.repo, "add", "-A")
+        git(self.repo, "commit", "-q", "-m", "init")
+        bin_dir = self.tmp / "bin"
+        bin_dir.mkdir()
+        (bin_dir / "claude").write_text(FAKE_CLAUDE, encoding="utf-8", newline="\n")
+        self.args_file = self.tmp / "claude-args.txt"
+        self.path = str(bin_dir) + os.pathsep + os.environ["PATH"]
+
+    def stage_change(self):
+        (self.repo / "a.txt").write_text("v2", encoding="utf-8")
+        git(self.repo, "add", "a.txt")
+
+    def commit_hook(self, output="", exit_code=0):
+        return subprocess.run(
+            [BASH, str(HOOKS_DIR / "pre-commit-review.sh")],
+            capture_output=True, text=True, encoding="utf-8", cwd=self.repo, timeout=60,
+            env={**os.environ, "PATH": self.path, "FAKE_CLAUDE_ARGS": str(self.args_file),
+                 "FAKE_CLAUDE_OUTPUT": output, "FAKE_CLAUDE_EXIT": str(exit_code)},
+        )
+
+    def review(self, c=0, m=0, n=0, t=0, verdict="Approve"):
+        return REVIEW_OUTPUT.format(c=c, m=m, n=n, t=t, verdict=verdict)
+
+    def test_skips_review_when_nothing_is_staged(self):
+        result = self.commit_hook(self.review())
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(self.args_file.exists())
+
+    def test_runs_review_code_staged_with_hooks_disabled(self):
+        self.stage_change()
+        self.commit_hook(self.review())
+        args = self.args_file.read_text(encoding="utf-8")
+        self.assertIn("/review-code --staged", args)
+        self.assertIn('"disableAllHooks":true', args)
+
+    def test_blocks_commit_when_review_has_critical(self):
+        self.stage_change()
+        result = self.commit_hook(self.review(c=1, verdict="Blocked"))
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("GATE: critical=1", result.stderr)
+        self.assertIn("--no-verify", result.stderr)
+
+    def test_passes_with_summary_when_highest_is_major(self):
+        self.stage_change()
+        result = self.commit_hook(self.review(m=1, n=2, verdict="Changes Requested"))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("GATE: critical=0 major=1", result.stderr)
+        self.assertIn("[🟡 minor] 예시 지적", result.stderr)
+
+    def test_summary_leaves_out_machine_json_block(self):
+        self.stage_change()
+        result = self.commit_hook(self.review(n=1))
+        self.assertNotIn("```json", result.stderr)
+
+    def test_passes_quietly_when_review_is_clean(self):
+        self.stage_change()
+        result = self.commit_hook(self.review())
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn("예시 지적", result.stderr)
+
+    def test_lets_commit_through_with_warning_when_review_fails(self):
+        self.stage_change()
+        result = self.commit_hook("API error", exit_code=1)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("검사 없이 통과", result.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()

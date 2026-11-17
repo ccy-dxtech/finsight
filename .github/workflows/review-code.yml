@@ -1,0 +1,59 @@
+# PR이 열리거나 커밋이 올라오면 /review-code를 헤드리스로 돌려 인라인 코멘트와 PR 요약을 단다.
+# 룰·심각도는 pre-commit hook과 같은 docs/REVIEW_RULES.md 하나를 쓴다.
+# API 키는 레포 Settings → Secrets → Actions의 ANTHROPIC_API_KEY로만 받는다(YAML에 쓰지 않는다).
+name: review-code
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: review-code-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    # 포크 PR에는 시크릿이 전달되지 않으므로 같은 레포 브랜치의 PR만 리뷰한다.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      # PR head를 그대로 꺼내 스킬이 worktree 없이 작업 폴더에서 파일을 읽게 한다.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+
+      # 리뷰어가 SDK 동작을 node_modules에서 확인할 수 있게 설치만 한다(설치 스크립트는 돌리지 않는다).
+      - run: npm ci --ignore-scripts
+
+      - run: npm install -g @anthropic-ai/claude-code@2.1.326
+
+      - name: Run /review-code
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          claude -p "/review-code $PR_NUMBER" \
+            --settings '{"disableAllHooks":true}' \
+            --model sonnet \
+            --no-session-persistence \
+            --allowedTools "Read" "Grep" "Glob" "Agent" "Bash(gh pr diff:*)" "Bash(gh pr view:*)" "Bash(git rev-parse:*)" \
+            > review-output.md || echo "claude -p가 실패했어요(exit $?)." >&2
+          cat review-output.md
+
+      - name: Post review
+        if: ${{ !cancelled() }}
+        run: python3 scripts/review_action.py review-output.md

@@ -19,5 +19,13 @@ export async function POST(request: NextRequest) {
     webhookSecret: process.env.POLAR_WEBHOOK_SECRET!,
     onSubscriptionActive: applyEvent,
     onSubscriptionRevoked: applyEvent,
+    onSubscriptionUncanceled: async (event) => {
+      const userId = event.data.customer.external_id;
+      if (!userId) return;
+      await createAdminClient()
+        .from("profiles")
+        .update({ plan: "pro", updated_at: new Date().toISOString() })
+        .eq("id", userId);
+    },
   })(request);
 }

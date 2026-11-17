@@ -54,3 +54,10 @@ it("DB 오류를 성공으로 응답하지 않는다", async () => {
   eq.mockResolvedValue({ error: new Error("db failed") });
   await expect(POST(request())).rejects.toThrow("db failed");
 });
+
+it("구독 취소를 철회하면 다시 pro로 바꾼다", async () => {
+  validateEvent.mockReturnValue(payload("subscription.uncanceled"));
+  expect((await POST(request())).status).toBe(200);
+  expect(update).toHaveBeenCalledWith(expect.objectContaining({ plan: "pro" }));
+  expect(eq).toHaveBeenCalledWith("id", "user-1");
+});

@@ -13,3 +13,9 @@ args = [
     "--output-dir",
     "test-results/browser",
 ]
+
+[shell_environment_policy]
+inherit = "core"
+
+[shell_environment_policy.set]
+ENABLE_CODE_SECURITY_REVIEW = "0"

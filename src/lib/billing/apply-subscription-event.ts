@@ -10,7 +10,7 @@ export async function applySubscriptionEvent(
   proProductId: string,
   updatePlan: (userId: string, plan: Plan) => Promise<void>,
 ) {
-  const plan = event.type === "subscription.active" ? "pro"
+  const plan = event.type === "subscription.active" || event.type === "subscription.uncanceled" ? "pro"
     : event.type === "subscription.revoked" ? "free" : null;
   const userId = event.data.customer.external_id;
   // 같은 조직의 다른 상품 구독이 Pro를 켜거나 끄지 않게 한다.

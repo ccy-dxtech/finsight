@@ -4,13 +4,13 @@ import { applySubscriptionEvent } from "./apply-subscription-event";
 const event = (type: string, { productId = "pro-product", externalId = "user-1" as string | null | undefined } = {}) =>
   ({ type, data: { product_id: productId, customer: { external_id: externalId } } });
 
-it.each([["subscription.active", "pro"], ["subscription.revoked", "free"]] as const)("프로 상품의 %s는 %s로 변경한다", async (type, plan) => {
+it.each([["subscription.active", "pro"], ["subscription.uncanceled", "pro"], ["subscription.revoked", "free"]] as const)("프로 상품의 %s는 %s로 변경한다", async (type, plan) => {
   const updatePlan = vi.fn().mockResolvedValue(undefined);
   await applySubscriptionEvent(event(type), "pro-product", updatePlan);
   expect(updatePlan).toHaveBeenCalledExactlyOnceWith("user-1", plan);
 });
 
-it.each(["subscription.active", "subscription.revoked"])("다른 상품의 %s는 플랜을 바꾸지 않는다", async (type) => {
+it.each(["subscription.active", "subscription.uncanceled", "subscription.revoked"])("다른 상품의 %s는 플랜을 바꾸지 않는다", async (type) => {
   const updatePlan = vi.fn();
   await applySubscriptionEvent(event(type, { productId: "other-product" }), "pro-product", updatePlan);
   expect(updatePlan).not.toHaveBeenCalled();

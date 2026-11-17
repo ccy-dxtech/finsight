@@ -1,6 +1,6 @@
 # 리뷰 룰 (REVIEW_RULES)
 
-`/review-code`의 세 서브에이전트(correctness·security·conventions), pre-commit hook, GitHub Action이 모두 이 파일 하나를 기준으로 리뷰한다.
+`/review-code`(PR·브랜치 범위는 correctness·security·conventions 세 서브에이전트, `--staged`는 혼자 한 번에), pre-commit hook, GitHub Action이 모두 이 파일 하나를 기준으로 리뷰한다.
 룰을 바꾸면 세 곳에 동시에 반영된다. 룰은 탐지 신호가 분명한 것만 둔다. 반복되는 오탐만 룰로 고치고, 한 번뿐인 오탐은 무시한다.
 
 ## 리뷰 범위

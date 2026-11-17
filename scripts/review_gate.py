@@ -46,8 +46,8 @@ def apply_gate(text, repo, pr, head_sha, gh, auto_merge):
     gate_line = "GATE 줄 없음" if counts is None else " ".join(f"{k}={v}" for k, v in counts.items())
 
     def review(event, body):
-        gh(["api", "--method", "POST", f"repos/{repo}/pulls/{pr}/reviews", "--input", "-"],
-           stdin=json.dumps({"commit_id": head_sha, "event": event, "body": body}))
+        return gh(["api", "--method", "POST", f"repos/{repo}/pulls/{pr}/reviews", "--input", "-"],
+                  stdin=json.dumps({"commit_id": head_sha, "event": event, "body": body}))
 
     if decision == "human":
         review("REQUEST_CHANGES", f"review-code 게이트: 🔴🟠가 있거나 결과를 읽지 못해 사람 리뷰가 필요해요. ({gate_line})")
@@ -55,10 +55,12 @@ def apply_gate(text, repo, pr, head_sha, gh, auto_merge):
            stdin=json.dumps({"labels": [LABEL]}))
         return 1
 
-    review("APPROVE", f"review-code 게이트: 🟡 이하라 자동 승인해요. ({gate_line})")
+    # 승인·머지 예약이 거부되면(레포 설정 꺼짐 등) 체크를 실패시켜 드러낸다.
+    if not review("APPROVE", f"review-code 게이트: 🟡 이하라 자동 승인해요. ({gate_line})"):
+        return 1
     gh(["api", "--method", "DELETE", f"repos/{repo}/issues/{pr}/labels/{LABEL}"])  # 없으면 404, 무시한다
     if decision == "auto-merge" and auto_merge == "on":
-        gh(["pr", "merge", pr, "--auto", "--rebase"])
+        return 0 if gh(["pr", "merge", pr, "--auto", "--rebase"]) else 1
     return 0
 
 

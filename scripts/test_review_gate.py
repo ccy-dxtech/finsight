@@ -44,14 +44,15 @@ class DecideTest(unittest.TestCase):
 
 
 class FakeGh:
-    """gh 호출 인자와 stdin JSON을 기록하고 항상 성공한다."""
+    """gh 호출 인자와 stdin JSON을 기록한다. fail_on이 인자에 들어 있는 호출만 실패한다."""
 
-    def __init__(self):
+    def __init__(self, fail_on=None):
         self.calls = []
+        self.fail_on = fail_on
 
     def __call__(self, args, stdin=None):
         self.calls.append((args, json.loads(stdin) if stdin else None))
-        return True
+        return not (self.fail_on and self.fail_on in " ".join(args))
 
     def reviews(self):
         return [payload["event"] for args, payload in self.calls if args[-3].endswith("/reviews")]
@@ -61,8 +62,8 @@ class FakeGh:
 
 
 class ApplyGateTest(unittest.TestCase):
-    def apply(self, text, auto_merge=""):
-        gh = FakeGh()
+    def apply(self, text, auto_merge="", fail_on=None):
+        gh = FakeGh(fail_on)
         code = apply_gate(text, repo="o/r", pr="6", head_sha="abc123", gh=gh, auto_merge=auto_merge)
         return code, gh
 
@@ -93,6 +94,14 @@ class ApplyGateTest(unittest.TestCase):
     def test_nit_only_schedules_auto_merge_when_turned_on(self):
         _, gh = self.apply(output(t=1), auto_merge="on")
         self.assertIn("pr merge 6 --auto --rebase", " | ".join(gh.joined()))
+
+    def test_fails_check_when_approval_is_rejected(self):
+        code, _ = self.apply(output(n=1), fail_on="/reviews")
+        self.assertEqual(code, 1)
+
+    def test_fails_check_when_auto_merge_cannot_be_scheduled(self):
+        code, _ = self.apply(output(t=1), auto_merge="on", fail_on="pr merge")
+        self.assertEqual(code, 1)
 
     def test_auto_merge_switch_does_not_merge_minor(self):
         _, gh = self.apply(output(n=1), auto_merge="on")

@@ -51,6 +51,7 @@ jobs:
             --model sonnet \
             --no-session-persistence \
             --allowedTools "Read" "Grep" "Glob" "Agent" "Bash(gh pr diff:*)" "Bash(gh pr view:*)" "Bash(git rev-parse:*)" \
+            --disallowedTools "Read(//proc/**)" \
             --output-format stream-json --verbose \
             > review-stream.jsonl || echo "claude -p가 실패했어요(exit $?)." >&2
           jq -r 'select(.type=="result") | .result // empty' review-stream.jsonl > review-output.md

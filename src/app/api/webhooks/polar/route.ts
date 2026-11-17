@@ -19,5 +19,7 @@ export async function POST(request: NextRequest) {
     webhookSecret: process.env.POLAR_WEBHOOK_SECRET!,
     onSubscriptionActive: applyEvent,
     onSubscriptionRevoked: applyEvent,
+    onSubscriptionPaused: applyEvent,
+    onSubscriptionResumed: applyEvent,
   })(request);
 }

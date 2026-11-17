@@ -63,3 +63,11 @@ jobs:
       - name: Post review
         if: ${{ !cancelled() }}
         run: python3 scripts/review_action.py review-output.md
+
+      # 🔴🟠 → Request changes·라벨·체크 실패 / 🟡 → 자동 승인 / ⚪만 → 승인 + 자동 머지(REVIEW_AUTO_MERGE=on일 때만)
+      # 자동 머지를 켜려면 레포 Allow auto-merge, 레포 변수 REVIEW_AUTO_MERGE=on, 위 permissions의 contents: write가 필요하다.
+      - name: Gate
+        if: ${{ !cancelled() }}
+        env:
+          REVIEW_AUTO_MERGE: ${{ vars.REVIEW_AUTO_MERGE }}
+        run: python3 scripts/review_gate.py review-output.md

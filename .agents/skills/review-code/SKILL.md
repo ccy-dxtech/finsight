@@ -25,9 +25,9 @@ argument-hint: "[비움=main...HEAD | --staged | PR번호 | git 범위]"
 
 ```bash
 git fetch origin pull/<숫자>/head:review-pr-<숫자>
-git worktree add .Codex/worktrees/review-pr-<숫자> review-pr-<숫자>
+git worktree add .claude/worktrees/review-pr-<숫자> review-pr-<숫자>
 # 리뷰가 끝난 뒤
-git worktree remove .Codex/worktrees/review-pr-<숫자> && git branch -D review-pr-<숫자>
+git worktree remove .claude/worktrees/review-pr-<숫자> && git branch -D review-pr-<숫자>
 ```
 
 인자가 `--staged`이면 커밋 직전 빠른 패스다. 2단계의 서브에이전트를 띄우지 말고, 공통 프롬프트 틀의 1~3번을 세 차원 모두에 대해 혼자 한 번에 수행한 뒤 3단계로 간다.

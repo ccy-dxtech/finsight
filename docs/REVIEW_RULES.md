@@ -96,6 +96,7 @@ GATE: critical=0 major=1 minor=2 nit=1
 ### R5. 웹훅 처리는 멱등해야 한다 — correctness / 🟠
 
 - 탐지 신호: 웹훅 핸들러에 이벤트 id 기준 중복 체크가 없어, 같은 이벤트가 두 번 오면 결과가 달라질 수 있음
+- 예외: 상태를 덮어쓰는 웹훅(`update({ plan })`처럼 절대값을 씀)은 같은 이벤트가 두 번 와도 결과가 같아 본질적으로 멱등이다. 누적·증가하는 웹훅(`insert`, `count + 1`)만 중복 체크를 요구한다.
 - 나쁨: 이벤트마다 `insert`하거나 `count + 1`
 - 좋음: 이벤트 id로 이미 처리한 이벤트를 건너뜀
 
@@ -116,7 +117,7 @@ GATE: critical=0 major=1 minor=2 nit=1
 
 ### S. 일반 웹 취약점 — security / 아래 정규화 표
 
-R1~R7에 걸리지 않는 보안 문제는 Claude Code 공식 플러그인 `security-guidance`(Apache-2.0)의 취약점 분류 중 FinSight에 해당하는 아래 항목으로 본다. diff 단위로만 본다. 코드베이스 전체 스캔은 이 리뷰의 범위가 아니다.
+R1~R10에 걸리지 않는 보안 문제는 Claude Code 공식 플러그인 `security-guidance`(Apache-2.0)의 취약점 분류 중 FinSight에 해당하는 아래 항목으로 본다. diff 단위로만 본다. 코드베이스 전체 스캔은 이 리뷰의 범위가 아니다.
 
 | 분류 | FinSight 탐지 신호 |
 |---|---|
@@ -133,7 +134,7 @@ R1~R7에 걸리지 않는 보안 문제는 Claude Code 공식 플러그인 `secu
 | GitHub Actions 위험 | `${{ github.event.pull_request.title }}` 같은 PR 값을 `run:`에 직접 삽입. 서드파티 action을 SHA가 아닌 태그로 고정 |
 | 위험한 자원 소모 | 업로드·파싱에 쪽 수·행 수·크기 상한이 없어 한 요청이 서버를 오래 점유 |
 
-플러그인 등급을 이 파일의 4단계로 바꾸는 표. R1~R7에 해당하면 그 룰의 심각도가 우선한다.
+플러그인 등급을 이 파일의 4단계로 바꾸는 표. R1~R10에 해당하면 그 룰의 심각도가 우선한다.
 
 | 플러그인 | 이 파일 | 기준 |
 |---|---|---|
@@ -150,3 +151,17 @@ R1~R7에 걸리지 않는 보안 문제는 Claude Code 공식 플러그인 `secu
   - `globals.css`의 `@theme` 토큰 대신 임의 값(`text-[13px]`, `bg-[#00c471]`, 인라인 `color: #...`)
   - `src/lib/`·`src/services/`에 새 함수를 넣었는데 대응하는 `*.test.ts`가 없음
 - 좋음: `text-title-md`, `text-ink`, `bg-primary` 같은 토큰 클래스, 해요체 한국어 문구
+
+### R9. 웹훅은 Pro 상품의 구독만 플랜에 반영 — security / 🟠
+
+- 탐지 신호: Polar 웹훅 처리(`src/app/api/webhooks/`, `src/lib/billing/`)가 `profiles.plan`을 바꾸는데, 그 경로에 이벤트의 `product_id`를 `POLAR_PRO_PRODUCT_ID`와 비교하는 검사가 없음. `applySubscriptionEvent`를 거치지 않고 핸들러에서 직접 `update`하는 새 코드가 대표적이다
+- 나쁨: `if (event.type === "subscription.active") await updatePlan(userId, "pro");` (상품 확인 없이 이벤트 종류만 봄)
+- 좋음: `if (event.data.product_id !== proProductId) return;` 뒤에 플랜 변경. 새 핸들러는 `applySubscriptionEvent`를 거치게 해 검사를 한 곳에 둔다
+- 근거: 같은 Polar 조직의 다른 상품 구독이 Pro를 켜고 끄던 버그(4c944a7). "나중에 상품이 늘면 문제"가 아니라 이미 겪은 일이므로 🟡로 낮추지 않는다
+
+### R10. Supabase 쓰기 결과의 `error`를 확인 — correctness / 🟠
+
+- 탐지 신호: `.insert`·`.update`·`.upsert`·`.delete`·`.rpc` 결과를 `await`만 하고 `error`를 확인하지 않음. supabase-js는 실패해도 예외를 던지지 않고 `{ error }`를 돌려준다(`shouldThrowOnError` 기본값 false). 웹훅이면 실패해도 200을 돌려줘 Polar가 재시도하지 않는다
+- 나쁨: `await admin.from("profiles").update({ plan }).eq("id", userId);`
+- 좋음: `const { error } = await admin.from("profiles").update({ plan }).eq("id", userId); if (error) throw error;`
+- 해당 없음: 읽기(`select`)는 결과를 쓰므로 이 룰이 아니라 일반 에러 처리로 본다

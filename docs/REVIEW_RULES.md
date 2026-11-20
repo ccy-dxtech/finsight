@@ -117,7 +117,7 @@ GATE: critical=0 major=1 minor=2 nit=1
 
 ### S. 일반 웹 취약점 — security / 아래 정규화 표
 
-R1~R10에 걸리지 않는 보안 문제는 Claude Code 공식 플러그인 `security-guidance`(Apache-2.0)의 취약점 분류 중 FinSight에 해당하는 아래 항목으로 본다. diff 단위로만 본다. 코드베이스 전체 스캔은 이 리뷰의 범위가 아니다.
+R1~R10에 걸리지 않는 보안 문제는 Claude Code 공식 플러그인 `security-guidance`(Apache-2.0)의 취약점 분류 중 FinSight에 해당하는 아래 항목으로 본다. diff 단위로만 본다. 코드베이스 전체 스캔은 이 리뷰의 범위가 아니다. 전체 스캔은 `/security-scan`(OWASP Top 10 2025)이 맡는다.
 
 | 분류 | FinSight 탐지 신호 |
 |---|---|

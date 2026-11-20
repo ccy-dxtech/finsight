@@ -77,7 +77,7 @@ supabase/
 | `transactions` | `id`, `user_id`, `occurred_on`(date), `merchant`, `amount`(bigint, 원, 음수 가능), `category` | 본인 SELECT·DELETE. 월별 추이와 중복 확인에만 쓴다 |
 | `usage` | `user_id`, `month`(KST 월 1일), `count` | 본인 SELECT만. 데이터 삭제 시에도 남는다 |
 
-- **RPC `commit_analysis`** (security definer, `auth.uid()` 사용): 라우트가 넘긴 리포트 1건과 새 거래 목록을 받아, 한 트랜잭션 안에서 `reports` 1행 INSERT → `transactions` INSERT → `usage` upsert +1을 하고 `report_id`를 반환한다. 판단 로직(한도, 중복)은 넣지 않는다.
+- **RPC `commit_analysis`** (security definer, `auth.uid()` 사용): 라우트가 넘긴 리포트 1건과 새 거래 목록을 받아, 한 트랜잭션 안에서 `reports` 1행 INSERT → `transactions` INSERT → `usage` upsert +1을 하고 `report_id`를 반환한다. 저장 전에 한도(`usage` 행 잠금)·거래 1~3,000건·이번 달(KST)·리포트 1MB를 다시 확인해 브라우저에서 직접 호출해도 상한을 넘지 못하게 한다(ADR-009). 중복 판단은 넣지 않는다.
 - 리포트 상세는 `reports` 한 행만 읽는다. 화면에 필요한 숫자는 `totals`와 `insights`에 다 들어 있다.
 
 ## 데이터 흐름

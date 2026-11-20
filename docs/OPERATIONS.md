@@ -125,6 +125,21 @@ npx vitest run supabase/migrations/schema.test.ts                               
    -- 가입 트리거 1행
    select tgname from pg_trigger where tgname = 'on_auth_user_created';
    ```
+4. 이어서 `0002_commit_analysis_limits.sql`도 같은 방법으로 적용한다(아래).
+
+### 마이그레이션 0002 적용(`commit_analysis` 한도 검사, 0001을 적용한 프로젝트에서 한 번)
+```powershell
+npx vitest run supabase/migrations/schema.test.ts                                              # SQL 정적 검사
+Get-Content supabase/migrations/0002_commit_analysis_limits.sql -Raw -Encoding UTF8 | Set-Clipboard
+```
+1. SQL Editor에 붙여 넣고 Run. `create or replace`라 다시 실행해도 된다. 실행 권한(authenticated만)은 그대로 유지된다.
+2. 적용 확인:
+   ```sql
+   -- 새 본문이 들어갔는지: true
+   select prosrc like '%Quota exceeded%' as has_quota_check from pg_proc where proname = 'commit_analysis';
+   -- 실행 권한: 소유자(postgres)와 authenticated만(anon·PUBLIC 없음)
+   select grantee from information_schema.routine_privileges where routine_name = 'commit_analysis';
+   ```
 
 ### Auth 설정(대시보드 화면, 명령 없음)
 - Authentication > Providers > Google을 켜고 Google Cloud의 OAuth 클라이언트 ID·비밀값을 넣는다.

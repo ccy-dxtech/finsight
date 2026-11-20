@@ -85,7 +85,7 @@ supabase/
 ### 분석 (`POST /api/analyze`, multipart 파일 1개)
 ```
 1. 세션 확인(401) → 형식·크기 확인(4MB, `lib/upload.ts`. Vercel 요청 본문 한도 4.5MB 안쪽)
-2. 한도 확인: profiles.plan과 이번 달 usage.count를 읽어 한도 이상이면 중단 (한도 확인은 여기 한 곳). 이때 읽은 plan으로 리포트 모델도 정한다
+2. 한도 확인: profiles.plan과 이번 달 usage.count를 읽어 한도 이상이면 중단 (AI 비용을 쓰기 전 사전 확인. 최종 확인은 7단계 RPC). 이때 읽은 plan으로 리포트 모델도 정한다
 3. 파일 읽기: xls/xlsx는 SheetJS, CSV는 UTF-8(fatal) 실패 시 EUC-KR로 읽어 SheetJS 파싱,
    PDF는 unpdf로 글자 조각과 좌표를 뽑아 쪽마다 행·열을 복원(lib/statement/pdf.ts, 글자가 없으면 unsupported_file)
    → 상단 10행 마스킹(6자리 이상 숫자) → claude.mapColumns (Haiku)
@@ -95,7 +95,7 @@ supabase/
 5. 분류: 고유 가맹점명을 200개씩 나눠 claude.classifyMerchants (Haiku, 병렬)
 6. 리포트: lib/aggregate로 카테고리 합계·기간 계산 → claude.writeReport (Free는 Sonnet 5.5, Pro는 Opus 5.5)
    → AI가 참조한 거래 id를 코드가 날짜·가맹점·금액으로 바꿔 insights에 넣는다. 없는 id를 참조한 항목은 버린다
-7. 저장: commit_analysis RPC(리포트 + 새 거래 + 사용 횟수 +1) → 응답 { reportId }
+7. 저장: commit_analysis RPC(한도·건수·월·크기 재확인 → 리포트 + 새 거래 + 사용 횟수 +1) → 응답 { reportId }. RPC가 거절하면 ai_failed
 ```
 - 응답은 끝났을 때 JSON 한 번이다. 성공은 `200 { reportId }`, 실패는 `4xx/5xx { error: "<code>", message: "<한국어 안내>" }`.
 - 클라이언트는 요청하는 동안 스피너를 보여주고, 성공하면 `/dashboard/reports/[id]`로 이동한다.

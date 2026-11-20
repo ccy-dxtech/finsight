@@ -139,3 +139,77 @@ describe("commit_analysis 한도 마이그레이션(0002)", () => {
     );
   });
 });
+
+// OWASP A06(거래 크기) + Supabase advisor(함수 실행 권한·RLS initplan·FK 인덱스).
+// Supabase는 public 스키마 함수에 anon·authenticated EXECUTE를 직접 주므로 `from public` 회수로는 막히지 않는다.
+const hardeningMigration = new URL("./0003_rpc_size_grants_rls.sql", import.meta.url);
+const hardeningSql = existsSync(hardeningMigration)
+  ? readFileSync(hardeningMigration, "utf8").replace(/--[^\n]*/g, "").toLowerCase()
+  : "";
+const hardeningRpc = hardeningSql.match(
+  /create or replace function public\.commit_analysis\s*\(([^)]*)\)([\s\S]*?)\$\$;/,
+);
+const hardeningBody = hardeningRpc?.[2] ?? "";
+const hardeningInsert = hardeningBody.indexOf("insert into public.reports");
+
+describe("RPC 크기·실행 권한·RLS 정리 마이그레이션(0003)", () => {
+  it("0002의 세션 사용자·건수·월·리포트 크기·한도 검사를 그대로 둔다", () => {
+    expect(hardeningRpc).not.toBeNull();
+    expect(hardeningRpc?.[1].replace(/\s+/g, " ").trim()).toBe(
+      "p_report jsonb, p_transactions jsonb, p_month date",
+    );
+    expect(hardeningBody).toMatch(/security definer/);
+    expect(hardeningBody).toMatch(/set search_path = public/);
+    expect(hardeningBody).toMatch(/if v_user_id is null then\s+raise exception/);
+    expect(hardeningBody).toMatch(/not between 1 and 3000 then\s+raise exception/);
+    expect(hardeningBody).toMatch(/p_month is distinct from date_trunc\('month', now\(\) at time zone 'asia\/seoul'\)::date/);
+    expect(hardeningBody).toMatch(/octet_length\(p_report::text\) > 1000000 then\s+raise exception/);
+    expect(hardeningBody).toMatch(/for update/);
+    expect(hardeningBody).toMatch(/if v_count >= coalesce\(v_limit, 0\) then\s+raise exception/);
+    expect(hardeningBody).toMatch(
+      /insert into public\.reports[\s\S]+insert into public\.transactions[\s\S]+update public\.usage set count = count \+ 1[\s\S]+return v_report_id/,
+    );
+  });
+
+  it("SQL의 플랜 한도는 getMonthlyLimit과 같다", () => {
+    const limits = hardeningBody.match(/case plan when 'pro' then (\d+) else (\d+) end/);
+    expect(Number(limits?.[1])).toBe(getMonthlyLimit("pro"));
+    expect(Number(limits?.[2])).toBe(getMonthlyLimit("free"));
+  });
+
+  it("거래 JSON이 2MB를 넘거나 가맹점명이 500자를 넘으면 저장 전에 거절한다", () => {
+    expect(hardeningBody).toMatch(
+      /octet_length\(p_transactions::text\) > 2000000\s+or exists \(select 1 from jsonb_array_elements\(p_transactions\) as entries\(item\)\s+where length\(item ->> 'merchant'\) > 500\) then\s+raise exception/,
+    );
+    expect(hardeningBody.search(/octet_length\(p_transactions::text\)/)).toBeLessThan(hardeningInsert);
+  });
+
+  it("commit_analysis는 anon에서, handle_new_user는 anon·authenticated에서 실행 권한을 회수한다", () => {
+    expect(hardeningSql).toMatch(
+      /revoke execute on function public\.commit_analysis\(jsonb, jsonb, date\) from anon;/,
+    );
+    expect(hardeningSql).toMatch(
+      /revoke execute on function public\.handle_new_user\(\) from anon, authenticated;/,
+    );
+    expect(hardeningSql).not.toMatch(/grant [^;]+ to (anon|public)\b/);
+  });
+
+  it.each([
+    ["profiles_select_own", "profiles", "id"],
+    ["reports_select_own", "reports", "user_id"],
+    ["reports_delete_own", "reports", "user_id"],
+    ["transactions_select_own", "transactions", "user_id"],
+    ["transactions_delete_own", "transactions", "user_id"],
+    ["usage_select_own", "usage", "user_id"],
+  ])("%s 정책은 auth.uid()를 한 번만 평가한다", (policy, table, column) => {
+    expect(hardeningSql).toMatch(
+      new RegExp(
+        `alter policy ${policy} on public\\.${table}\\s+using \\(\\(select auth\\.uid\\(\\)\\) = ${column}\\);`,
+      ),
+    );
+  });
+
+  it("reports.user_id 외래 키에 인덱스를 만든다", () => {
+    expect(hardeningSql).toMatch(/create index \w+\s+on public\.reports \(user_id\);/);
+  });
+});

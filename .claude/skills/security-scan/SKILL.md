@@ -17,7 +17,7 @@ description: FinSight 저장소 전체(diff가 아니라 repo 전부)를 OWASP T
 | `src/` (`*.test.ts`·`*.test.tsx` 제외), `supabase/migrations/`, `.github/`, `package.json`, `next.config.ts`, `src/proxy.ts`, `.env.example` | `tests/`, `**/*.test.*`, `docs/`, `.claude/`, `.agents/`, `node_modules/`, `npm audit`, 원격 DB |
 
 - `.env.local`은 읽지 않는다.
-- `docs/PRD.md`의 "## 한계"에 적힌 항목은 이미 받아들인 위험이다. 지적하지 않는다. 예: 웹훅 순서·중복은 처리하지 않음, 두 탭에서 동시에 분석하면 한도를 넘길 수 있음, 열 매핑 때 상단 행 텍스트가 AI에 전달됨.
+- `docs/PRD.md`의 "## 한계"에 적힌 항목은 이미 받아들인 위험이다. 지적하지 않는다. 예: 웹훅 순서·중복은 처리하지 않음, 두 탭에서 동시에 분석하면 둘 다 AI 비용을 씀, 열 매핑 때 상단 행 텍스트가 AI에 전달됨. 예시보다 PRD 원문이 우선한다. 한도를 넘어 저장되는 것은 받아들인 위험이 아니다(`commit_analysis`가 막는다).
 - `docs/REVIEW_RULES.md` "리뷰 범위"의 "diff에 들어온 줄만 지적한다"는 이 스킬에서 "스캔 대상 전체를 지적한다"로 바꿔 읽는다. 나머지 규칙은 그대로 따른다. 외부 SDK 지적은 `node_modules`로 확인하고, 확신이 없으면 한 단계 낮추고, 🔴는 악용 시나리오를 한 문장으로 쓸 수 있을 때만 단다.
 
 ## 2. OWASP Top 10 (2025) 루브릭

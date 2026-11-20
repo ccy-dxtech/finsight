@@ -52,7 +52,7 @@ if ($c) { (Get-CimInstance Win32_Process -Filter "ProcessId=$($c.OwningProcess)"
 | 대상 | 상태 |
 |---|---|
 | 로컬 dev 서버 | 동작함 |
-| Supabase | 마이그레이션 적용됨(2026-11-08 E2E S1·S5~S9 통과, `docs/BROWSER_TESTING.md`). Supabase CLI는 쓰지 않는다(`supabase/config.toml` 없음) |
+| Supabase | 프로덕션 `ieoycwkxokmdhrmozzeo`에 0001~0003 적용됨(0003은 2026-11-21). staging `kvxhqemjmkaaabtsqpzo`에도 0001~0003 적용, s9 통과(아래 "Supabase staging"). Supabase CLI는 쓰지 않는다(`supabase/config.toml` 없음) |
 | Claude API | 키와 모델 ID 3개 확인됨(아래 "Claude API" 명령) |
 | Polar | `.env.local`의 `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, `POLAR_PRO_PRODUCT_ID`가 비어 있다. 결제·포털·웹훅은 아직 실제로 돌려 보지 않았다 |
 | Vercel | 배포됨. 팀 `rainday1`(Hobby)의 프로젝트 `finsight`, GitHub `ccy-dxtech/finsight` 연동(main push → 프로덕션 자동 배포). 공개 주소 `https://finsight-silk-nu.vercel.app`. 환경 변수는 Production에만 있고 Polar 3개는 비어 있다(웹훅은 500). Supabase Redirect URLs 등록은 아래 "Vercel 배포"를 본다 |
@@ -64,6 +64,7 @@ if ($c) { (Get-CimInstance Win32_Process -Filter "ProcessId=$($c.OwningProcess)"
 | 화면 스타일이 깨지거나 빌드 결과가 이상하다 | 로컬 서버 기타 > 빌드 캐시 지우기 |
 | 어떤 환경 변수가 비었는지 모르겠다 | 환경 변수 |
 | 새 Supabase 프로젝트를 만들었다 | Supabase > 마이그레이션 적용 |
+| 새 마이그레이션을 프로덕션에 넣기 전에 시험하고 싶다 | Supabase staging |
 | 결제했는데 프로로 안 바뀐다 | Polar > 웹훅 확인 → Supabase > 플랜 수동 변경 |
 | 테스트 계정을 프로에서 무료로 되돌린다 | `/downgrade-free` 스킬(Polar 구독 해지 + `profiles.plan`) |
 | 분석 횟수를 되돌려 줘야 한다 | Supabase > 이번 달 분석 횟수 되돌리기 |
@@ -125,7 +126,7 @@ npx vitest run supabase/migrations/schema.test.ts                               
    -- 가입 트리거 1행
    select tgname from pg_trigger where tgname = 'on_auth_user_created';
    ```
-4. 이어서 `0002_commit_analysis_limits.sql`도 같은 방법으로 적용한다(아래).
+4. 이어서 `0002_commit_analysis_limits.sql`, `0003_rpc_size_grants_rls.sql`도 차례로 적용한다(아래).
 
 ### 마이그레이션 0002 적용(`commit_analysis` 한도 검사, 0001을 적용한 프로젝트에서 한 번)
 ```powershell
@@ -137,9 +138,33 @@ Get-Content supabase/migrations/0002_commit_analysis_limits.sql -Raw -Encoding U
    ```sql
    -- 새 본문이 들어갔는지: true
    select prosrc like '%Quota exceeded%' as has_quota_check from pg_proc where proname = 'commit_analysis';
-   -- 실행 권한: 소유자(postgres)와 authenticated만(anon·PUBLIC 없음)
+   -- 실행 권한: 소유자(postgres), authenticated, service_role. anon은 0003 적용 뒤 빠진다
    select grantee from information_schema.routine_privileges where routine_name = 'commit_analysis';
    ```
+   - 0001·0002만 적용한 상태에서는 `anon`도 실행 권한이 있다. Supabase가 public 스키마 함수에 `anon`·`authenticated` 권한을 직접 주기 때문에 `revoke ... from public`으로는 빠지지 않는다. 0003이 회수한다.
+
+### 마이그레이션 0003 적용(거래 크기 검사, 함수 실행 권한, RLS initplan, 인덱스. 0002를 적용한 프로젝트에서 한 번)
+```powershell
+npx vitest run supabase/migrations/schema.test.ts                                              # SQL 정적 검사
+Get-Content supabase/migrations/0003_rpc_size_grants_rls.sql -Raw -Encoding UTF8 | Set-Clipboard
+```
+1. 먼저 staging에 적용하고 확인한다(아래 "Supabase staging").
+2. 프로덕션 SQL Editor에 붙여 넣고 **한 번만** Run. 다시 돌리면 마지막 `create index`가 `already exists`로 실패한다(그 앞의 문장은 이미 적용된 상태라 영향 없음).
+3. 적용 확인(읽기 전용, 프로덕션 MCP로도 돌릴 수 있다):
+   ```sql
+   -- 실행 권한: commit_analysis는 anon=false·authenticated=true, handle_new_user는 둘 다 false
+   select p.proname, r.rolname, has_function_privilege(r.oid, p.oid, 'execute')
+   from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+   cross join (select oid, rolname from pg_roles where rolname in ('anon', 'authenticated')) r
+   where n.nspname = 'public' order by 1, 2;
+   -- 정책 6개 모두 qual이 (( SELECT auth.uid() AS uid) = ...)
+   select tablename, policyname, qual from pg_policies where schemaname = 'public';
+   -- reports_user_id_idx 1행
+   select indexname from pg_indexes where indexname = 'reports_user_id_idx';
+   -- 새 본문이 들어갔는지: true
+   select prosrc like '%Transactions too large%' from pg_proc where proname = 'commit_analysis';
+   ```
+4. 대시보드 Advisors에 남는 경고: `commit_analysis`를 authenticated가 실행할 수 있다는 0029 1건(앱이 불러야 하므로 의도한 것), Leaked Password Protection(Auth 설정), INFO `unused_index`.
 
 ### Auth 설정(대시보드 화면, 명령 없음)
 - Authentication > Providers > Google을 켜고 Google Cloud의 OAuth 클라이언트 ID·비밀값을 넣는다.
@@ -281,6 +306,27 @@ npx vercel logs https://finsight-silk-nu.vercel.app --scope rainday1 --since 30m
 ### 배포 뒤 함께 바꿀 곳
 - Supabase 대시보드 > Authentication > URL Configuration > Redirect URLs에 `https://finsight-silk-nu.vercel.app/**` 추가. 없으면 Google 로그인 뒤 Site URL(로컬 주소)로 돌아간다.
 - Polar 웹훅 URL을 `https://finsight-silk-nu.vercel.app/api/webhooks/polar`로 등록하고, Polar 값 3개를 Vercel 변수로 넣은 뒤 다시 배포한다(위 "Polar").
+
+## Supabase staging
+프로덕션과 분리된 무료 프로젝트 `finsight-staging`(`kvxhqemjmkaaabtsqpzo`)이다. 사용자 데이터는 없다. 새 마이그레이션은 여기서 먼저 적용하고 확인한 뒤 프로덕션 SQL Editor에 넣는다.
+
+| MCP 서버(`.mcp.json`) | 프로젝트 | 권한 |
+|---|---|---|
+| `supabase` | 프로덕션 `ieoycwkxokmdhrmozzeo` | `read_only=true`. 조회·advisor만 한다 |
+| `supabase-staging` | staging `kvxhqemjmkaaabtsqpzo` | 쓰기 가능. `apply_migration`으로 마이그레이션을 적용한다 |
+
+- staging MCP의 `execute_sql`은 `insert`·`delete`가 든 SQL을 Supabase 쪽 확인 단계에서 거절한다(VS Code에서는 확인 창이 뜨지 않음). 쓰기가 필요한 동작 확인은 staging SQL Editor에서 하거나 E2E로 한다.
+- 순서: staging에 적용 → 조회·advisor로 확인 → staging E2E → 프로덕션 SQL Editor 적용 → 프로덕션 MCP로 같은 조회·advisor 확인.
+
+### staging에 E2E 돌리기
+`.env.staging`(gitignore 대상)에 staging의 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`(publishable), `SUPABASE_SERVICE_ROLE_KEY`(secret)를 넣는다. 키는 staging 대시보드 Project Settings > API Keys에 있다. Next와 Playwright 모두 이미 있는 환경 변수를 `.env.local`보다 우선하므로, 이 세 값만 셸 환경 변수로 덮어쓰고 나머지는 `.env.local`을 쓴다.
+```powershell
+Get-Content .env.staging | Where-Object { $_ -match '^([A-Z_]+)=(.+)$' } | ForEach-Object { Set-Item "Env:$($Matches[1])" $Matches[2] }
+npx playwright test tests/e2e/s9-other-user-report.spec.ts
+```
+- 3000번 포트에 다른 서버가 없어야 한다(위 "기동 중인지 확인"). 떠 있으면 그 서버(프로덕션 연결)를 그대로 쓴다.
+- s9의 "B 본인은 볼 수 있다"가 통과하면 앱이 staging에 붙어 있었다는 뜻이다(시드를 staging에 넣었으므로 프로덕션이면 404).
+- 값은 그 PowerShell 창이 닫힐 때까지 남으니, 끝나면 창을 닫는다.
 
 ## E2E 테스트 계정
 E2E는 실제 Supabase 프로젝트에 `e2e-a@finsight.test`, `e2e-b@finsight.test`를 만들고, 끝나면 지운다. 다음 실행의 global-setup도 남은 계정을 지우고 새로 만든다.

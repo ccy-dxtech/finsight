@@ -15,6 +15,14 @@
         "--output-dir",
         "test-results/browser"
       ]
+    },
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=ieoycwkxokmdhrmozzeo&read_only=true"
+    },
+    "supabase-staging": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=kvxhqemjmkaaabtsqpzo"
     }
   }
 }

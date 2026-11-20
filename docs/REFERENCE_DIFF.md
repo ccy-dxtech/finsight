@@ -44,9 +44,11 @@
 | 파일을 기본 인코딩으로 읽고 씀 | UTF-8을 명시한다. `scripts/test_execute.py`는 `PYTHONUTF8=1`로 실행한다. | Windows 기본 인코딩(cp949)으로 한국어 문서를 읽다가 멈췄다. | `scripts/execute.py`, `scripts/test_execute.py` |
 | 훅 명령 `bash ...` | Codex 훅은 `commandWindows`에서 Git Bash를 전체 경로(`C:\Program Files\Git\bin\bash.exe`)로 부른다. | PATH에 `bash`가 없어서 훅이 실행되지 않았다. | `.codex/hooks.json` |
 | 없음 | `.gitattributes`로 `*.sh`를 LF로 고정 | autocrlf 때문에 줄바꿈이 CRLF로 바뀌면 bash 스크립트가 깨진다. | `.gitattributes` |
+| `npm run test`를 저장소 폴더에서 실행 | 드라이브 문자가 대문자인 경로(`C:\Users\Public\Documents\finsight`)에서 실행한다 | VS Code가 폴더를 소문자 `c:\...`로 열면 Vitest 5가 `vitest` 모듈을 두 번 불러 65개 파일 모두 `TypeError: Cannot read properties of undefined (reading 'config')`로 실패했다(2026-11-21). 같은 명령을 `C:\`에서 돌리면 통과한다. | `vitest.config.ts` |
 
 ## 에이전트 도구
 | 원본 | 여기서는 | 이유·근거 | 관련 파일 |
 |---|---|---|---|
+| 강의 Ch03: Supabase Branching의 persistent branch를 staging으로 사용 | 별도 무료 프로젝트 `finsight-staging`(`kvxhqemjmkaaabtsqpzo`)을 staging으로 쓴다. MCP는 프로덕션 `supabase`(`read_only=true`)와 `supabase-staging`(쓰기 가능) 두 개로 나눈다. | Branching은 Pro(유료) 플랜 기능이고 이 조직은 FREE다. 강의도 무료 대안으로 별도 프로젝트를 제시한다. | `.mcp.json`, `docs/OPERATIONS.md` "Supabase staging" |
 | `browser-test` 스킬 + dev-browser + `scripts/dev-doctor.sh` | Playwright MCP(`@playwright/mcp`, 설치된 Chrome, 최대화 창) | 원본 스킬은 가져오지 않고, Claude Code에 MCP로 붙는 Playwright를 쓴다. 절차는 `docs/BROWSER_TESTING.md`에 있다. | `.mcp.json`, `docs/BROWSER_TESTING.md` |
 | 강의 `/review-code` 스킬(Agent 서브에이전트 병렬, critical·major·minor·nit 4단계) | 기존 `/review` 명령이 `review-code` 워크플로(Workflow 도구)로 correctness·security·architecture(+ux) 리뷰어를 병렬로 돌린다. 심각도는 기존 P0~P2를 쓴다. PR이 있으면 인라인 코멘트, 없으면 콘솔 표로 낸다. | 차원별 반박 검증까지 정해진 순서로 돌리려고 Workflow를 쓴다. 하네스 step은 `codex exec`라 Workflow가 없으므로 에이전트 정의 파일을 직접 읽는 fallback을 둔다. 워크플로 스크립트는 단위 테스트를 둘 수 없어 TDD 가드·ESLint에서 뺐다. | `.claude/commands/review.md`, `.claude/workflows/review-code.js`, `.claude/agents/*-reviewer.md` |

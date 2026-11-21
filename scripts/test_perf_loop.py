@@ -5,7 +5,9 @@ scripts/perf_loop.py 테스트. Lighthouse 결과에서 지표를 뽑고, 게이
 """
 
 import sys
+import threading
 import unittest
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -14,6 +16,7 @@ from perf_loop import (  # noqa: E402
     check_gate,
     extract_metrics,
     failing_audits,
+    fetch,
     median_metrics,
     render_section,
     run,
@@ -123,6 +126,25 @@ class FailingAuditsTest(unittest.TestCase):
         self.assertIn("render-blocking-insight", text)
         self.assertNotIn("font-display-insight", text)
         self.assertNotIn("diagnostics", text)
+
+
+class FetchTest(unittest.TestCase):
+    def test_http_error_status_is_returned_not_raised(self):
+        class NotFound(BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(404)
+                self.end_headers()
+
+            def log_message(self, *args):
+                pass
+
+        server = HTTPServer(("127.0.0.1", 0), NotFound)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        try:
+            status, _ = fetch(f"http://127.0.0.1:{server.server_port}/")
+        finally:
+            server.shutdown()
+        self.assertEqual(status, 404)
 
 
 class RunTest(unittest.TestCase):

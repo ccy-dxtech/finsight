@@ -360,6 +360,6 @@ python -m unittest scripts/test_perf_loop.py                                 # �
 - 측정 서버는 3100번(`next start -p 3100`)이다. 3000번 개발 서버와 함께 떠 있어도 된다. 3100번이 이미 쓰이고 있으면 측정하지 않는다.
 - 게이트는 바이트·항목 수(실행마다 같은 값)만 쓴다. 점수·LCP·TBT·CLS는 실행마다 출렁여 참고로만 기록한다. 총 바이트는 HTML 크기가 1바이트쯤 흔들려 한도에 1KB 여유를 뒀다.
 - 바퀴마다 `npm run lint`·`npm run test`·`npm run build`와 스모크(페이지 200 + 핵심 문구)를 통과해야 커밋한다. 실패하거나 pre-commit 리뷰가 커밋을 막으면 그 바퀴 변경을 되돌린다.
-- 멈춤 이유: `gate_passed`(게이트 통과), `max_iter`(3바퀴), `no_diff`(에이전트가 아무것도 바꾸지 않음), `stalled`(게이트 지표가 하나도 줄지 않음).
+- 멈춤 이유: `gate_passed`(게이트 통과), `max_iter`(3바퀴), `no_diff`(에이전트가 아무것도 바꾸지 않음), `stalled`(게이트 지표가 하나도 줄지 않음. 그 바퀴 변경은 되돌린다).
 - 바퀴마다 `claude -p` 2번(분석·적용)과 pre-commit 리뷰 1번이 돌아 API 비용이 든다.
 - 끝나면 PR을 열어 review-code Action의 GATE를 거쳐 사람이 머지한다. 머지·배포 뒤 배포 주소를 다시 잰다.

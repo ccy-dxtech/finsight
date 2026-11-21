@@ -147,8 +147,12 @@ def log(message):
 
 
 def run(args, timeout=1800, input_text=None):
-    return subprocess.run(args, cwd=ROOT, capture_output=True, text=True, encoding="utf-8",
-                          errors="replace", timeout=timeout, input=input_text)
+    """시간 초과도 실패(124)로 돌려줘, 루프가 되돌림·기록 없이 죽지 않게 한다."""
+    try:
+        return subprocess.run(args, cwd=ROOT, capture_output=True, text=True, encoding="utf-8",
+                              errors="replace", timeout=timeout, input=input_text)
+    except subprocess.TimeoutExpired:
+        return subprocess.CompletedProcess(args, 124, "", f"timeout {timeout}s")
 
 
 def git(*args):

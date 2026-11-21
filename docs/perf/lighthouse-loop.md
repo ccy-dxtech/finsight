@@ -13,9 +13,12 @@
 | 1 | /login | 적용 | 100 | 906 | 46 | 0.001 | 252,584 | 143,790 | 81,612 | 1 | 13,909 |
 | 2 | / | 적용 | 100 | 1082 | 62 | 0.009 | 479,958 | 143,651 | 265,088 | 0 | 13,909 |
 | 2 | /login | 적용 | 100 | 1027 | 83 | 0.001 | 294,503 | 143,790 | 81,612 | 0 | 13,909 |
+| 3 | / | 적용 | 100 | 907 | 54 | 0.008 | 443,134 | 138,647 | 265,088 | 0 | 0 |
+| 3 | /login | 적용 | 100 | 868 | 60 | 0.001 | 257,578 | 140,374 | 81,612 | 0 | 0 |
 
 - 바퀴 0 게이트 미달: / render_blocking 1 > 0, / legacy_js_bytes 13909 > 0, /login render_blocking 1 > 0, /login legacy_js_bytes 13909 > 0, /login script_bytes 212319 > 160000
 - 바퀴 1 게이트 미달: / render_blocking 1 > 0, / legacy_js_bytes 13909 > 0, /login render_blocking 1 > 0, /login legacy_js_bytes 13909 > 0
 - 바퀴 2 게이트 미달: / legacy_js_bytes 13909 > 0, / total_bytes 479958 > 439167, /login legacy_js_bytes 13909 > 0
+- 바퀴 3 게이트 미달: / total_bytes 443134 > 439167
 
-멈춤: (진행 중)
+멈춤: max_iter

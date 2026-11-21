@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Button } from "@/components/Button";
 import { Hero } from "@/components/Hero";
 import { StepList } from "@/components/StepList";
@@ -21,8 +22,7 @@ export default async function Home() {
     <>
       <header className="border-b border-hairline bg-canvas">
         <div className={`${container} flex h-16 items-center justify-between gap-4`}>
-          {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- 공개 페이지에서 next/link 클라이언트 청크를 빼려고 일반 링크를 쓴다 */}
-          <a href="/" className="text-title-md font-extrabold text-ink">Fin<b className="text-primary">Sight</b></a>
+          <Link href="/" className="text-title-md font-extrabold text-ink">Fin<b className="text-primary">Sight</b></Link>
           <Button variant="secondary" size="md" href={user ? "/dashboard" : "/login"}>
             {user ? "대시보드로 가기" : "로그인"}
           </Button>

@@ -22,3 +22,12 @@
 - 바퀴 3 게이트 미달: / total_bytes 443134 > 439167
 
 멈춤: max_iter
+
+### 사람 판단: 바퀴 1·2만 남기고 바퀴 3은 되돌림
+- 남김: 바퀴 1 `GoogleLoginButton`이 Supabase 클라이언트를 클릭할 때 불러온다(`/login` JS 212KB→144KB). 바퀴 2 `experimental.inlineCss`로 render-blocking CSS 0개.
+- 되돌림: 바퀴 3(`c753f61`). 게이트 숫자는 줄였지만 동작 위험이 컸다.
+  - Pretendard를 마운트 뒤에 불러와 모든 페이지가 기본 글꼴로 먼저 보였다(랩 CLS 0.008이라 게이트는 못 잡음).
+  - Next 내부 polyfill 파일을 Turbopack 로더로 비워 Next 업그레이드 때 조용히 깨질 수 있다.
+  - 로고 `<Link>`를 `<a>`로 바꾸며 lint 규칙을 주석으로 껐다. lucide 아이콘 path를 복사해 정의가 두 곳에 생겼다.
+- 머지 시점 상태는 바퀴 2 숫자다. 남은 게이트 미달은 레거시 JS 13,909B(두 페이지)와 `/` 총 바이트(inlineCss로 HTML이 커짐) 3건이다.
+- 루프 개선 거리: 게이트에 "글꼴이 첫 HTML에 있는지" 같은 동작 조건이 없어, 에이전트가 숫자를 위해 체감 품질을 바꿀 수 있었다.

@@ -11,8 +11,11 @@
 | 0 | /login | 기준선 | 100 | 909 | 28 | 0.001 | 321,152 | 212,319 | 81,612 | 1 | 13,909 |
 | 1 | / | 적용 | 100 | 908 | 55 | 0.009 | 438,165 | 143,651 | 265,088 | 1 | 13,909 |
 | 1 | /login | 적용 | 100 | 906 | 46 | 0.001 | 252,584 | 143,790 | 81,612 | 1 | 13,909 |
+| 2 | / | 적용 | 100 | 1082 | 62 | 0.009 | 479,958 | 143,651 | 265,088 | 0 | 13,909 |
+| 2 | /login | 적용 | 100 | 1027 | 83 | 0.001 | 294,503 | 143,790 | 81,612 | 0 | 13,909 |
 
 - 바퀴 0 게이트 미달: / render_blocking 1 > 0, / legacy_js_bytes 13909 > 0, /login render_blocking 1 > 0, /login legacy_js_bytes 13909 > 0, /login script_bytes 212319 > 160000
 - 바퀴 1 게이트 미달: / render_blocking 1 > 0, / legacy_js_bytes 13909 > 0, /login render_blocking 1 > 0, /login legacy_js_bytes 13909 > 0
+- 바퀴 2 게이트 미달: / legacy_js_bytes 13909 > 0, / total_bytes 479958 > 439167, /login legacy_js_bytes 13909 > 0
 
 멈춤: (진행 중)

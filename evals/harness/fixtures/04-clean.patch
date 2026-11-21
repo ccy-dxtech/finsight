@@ -1,0 +1,39 @@
+diff --git a/src/lib/format.test.ts b/src/lib/format.test.ts
+index 8015153..98f5cc1 100644
+--- a/src/lib/format.test.ts
++++ b/src/lib/format.test.ts
+@@ -1,5 +1,5 @@
+ import { expect, it } from "vitest";
+-import { formatAmount, formatDate, formatMonth, formatNumber, formatPeriod } from "./format";
++import { formatAmount, formatCount, formatDate, formatMonth, formatNumber, formatPeriod } from "./format";
+ 
+ // 화면은 "원"을 숫자보다 작게 따로 붙이므로 단위 없는 숫자가 필요하다.
+ it("원 단위 bigint를 단위 없이 천 단위 쉼표로만 표시한다", () => {
+@@ -15,6 +15,12 @@ it("YYYY-MM 달을 한국어 연월로 표시한다", () => {
+   expect(formatMonth("2026-12")).toBe("2026년 12월");
+ });
+ 
++it("거래 건수를 천 단위 쉼표와 '건'으로 표시한다", () => {
++  expect(formatCount(0)).toBe("0건");
++  expect(formatCount(7)).toBe("7건");
++  expect(formatCount(12500)).toBe("12,500건");
++});
++
+ it("원 단위 bigint를 정밀도 손실 없이 표시한다", () => {
+   expect(formatAmount(12500n)).toBe("12,500원");
+   expect(formatAmount(-12500n)).toBe("-12,500원");
+diff --git a/src/lib/format.ts b/src/lib/format.ts
+index 353bccc..cfe68bf 100644
+--- a/src/lib/format.ts
++++ b/src/lib/format.ts
+@@ -7,6 +7,10 @@ export function formatNumber(amount: bigint): string {
+   return won.format(amount);
+ }
+ 
++export function formatCount(count: number): string {
++  return `${won.format(count)}건`;
++}
++
+ export function formatAmount(amount: bigint): string {
+   return `${formatNumber(amount)}원`;
+ }

@@ -1,0 +1,19 @@
+diff --git a/supabase/migrations/0004_report_notes.sql b/supabase/migrations/0004_report_notes.sql
+new file mode 100644
+index 0000000..7db486f
+--- /dev/null
++++ b/supabase/migrations/0004_report_notes.sql
+@@ -0,0 +1,13 @@
++-- 리포트마다 사용자가 짧은 메모를 남길 수 있게 한다.
++create table public.report_notes (
++  id uuid primary key default gen_random_uuid(),
++  user_id uuid not null references auth.users (id) on delete cascade,
++  report_id uuid not null references public.reports (id) on delete cascade,
++  body text not null check (char_length(body) <= 500),
++  created_at timestamptz not null default now()
++);
++
++create index report_notes_user_report_idx
++  on public.report_notes (user_id, report_id);
++
++grant select, insert, delete on public.report_notes to authenticated;

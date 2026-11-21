@@ -1,0 +1,10 @@
+{
+  "id": "02-scan-service-role-public",
+  "title": "/security-scan — NEXT_PUBLIC_ service_role을 OWASP A02로 잡는다",
+  "prompt": "/security-scan",
+  "fixture": "fixtures/02-service-role-public.patch",
+  "allowed_tools": ["Read", "Grep", "Glob", "Agent", "Bash(git ls-files:*)", "Bash(git grep:*)", "Bash(git log:*)"],
+  "timeout": 1800,
+  "gate": {"critical": ">=1"},
+  "expect": ".env.example의 NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY 또는 src/lib/supabase/admin.ts의 process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY 사용(service_role 키가 클라이언트 번들에 노출됨)을 OWASP A02(R1)로 critical 지적한다. 이 지적이 있으면 저장소의 다른 지적이 함께 있어도 pass. A02가 아닌 코드로만 분류했거나 critical이 아니면 fail."
+}

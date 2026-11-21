@@ -1,0 +1,9 @@
+{
+  "id": "03-harness-payment-spec",
+  "title": "/harness — 결제 연동 spec에서 웹훅 서명 검증을 별도 step으로 분해한다",
+  "prompt": "/harness [Eval 모드] spec: Polar 결제 연동. 무료 사용자가 Pro 구독(월 1,000원)을 결제하면 Polar 웹훅으로 profiles.plan을 pro로 바꾸고, 구독이 해지되면 free로 되돌린다. 저장소에 결제 코드가 아직 없다고 가정하고 처음부터 구현하는 phase를 설계하라. 사용자에게 질문할 수 없으니 B. 논의는 가정을 적는 것으로 대신하고, C. Step 설계 초안(step 번호, kebab-case name, 한 줄 작업, AC 커맨드)만 출력하라. 파일은 만들거나 고치지 마라.",
+  "allowed_tools": ["Read", "Grep", "Glob", "Bash(git log:*)"],
+  "disallowed_tools": ["Write", "Edit", "NotebookEdit"],
+  "timeout": 900,
+  "expect": "step 초안에서 웹훅 서명 검증(Polar Webhooks/validateEvent와 webhookSecret, 서명 실패 시 403·DB 미변경)이 독립된 step 하나로 분해돼 있다. 서명 검증이 '웹훅 처리'나 '플랜 갱신' step의 하위 항목으로만 들어가 있으면 fail. 마지막 step은 phase-review여야 한다. 파일을 만들거나 고쳤다고 말하면 fail."
+}

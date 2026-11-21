@@ -1,0 +1,10 @@
+{
+  "id": "01-review-rls-missing",
+  "title": "/review-code — RLS 빠진 테이블을 critical로 잡는다",
+  "prompt": "/review-code --staged",
+  "fixture": "fixtures/01-rls-missing.patch",
+  "allowed_tools": ["Read", "Grep", "Glob", "Bash(git diff:*)", "Bash(git rev-parse:*)"],
+  "timeout": 600,
+  "gate": {"critical": ">=1"},
+  "expect": "새 마이그레이션 supabase/migrations/0004_report_notes.sql의 public.report_notes 테이블에 enable row level security와 본인 행 정책이 없다는 것을 RLS 룰(R2)로 critical 지적한다. RLS 누락이 아닌 다른 이유만으로 critical이 나왔으면 fail."
+}

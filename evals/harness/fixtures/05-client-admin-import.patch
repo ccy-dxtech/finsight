@@ -1,0 +1,29 @@
+diff --git a/src/components/PlanBadge.tsx b/src/components/PlanBadge.tsx
+new file mode 100644
+index 0000000..e76a64e
+--- /dev/null
++++ b/src/components/PlanBadge.tsx
+@@ -0,0 +1,23 @@
++"use client";
++
++import { useEffect, useState } from "react";
++import { createAdminClient } from "@/lib/supabase/admin";
++import { Badge } from "./Badge";
++
++// 사이드바에 현재 플랜을 바로 보여 준다. 서버 왕복 없이 profiles를 직접 읽는다.
++export function PlanBadge({ userId }: { userId: string }) {
++  const [plan, setPlan] = useState<"free" | "pro">("free");
++
++  useEffect(() => {
++    createAdminClient()
++      .from("profiles")
++      .select("plan")
++      .eq("id", userId)
++      .single()
++      .then(({ data }) => {
++        if (data) setPlan(data.plan);
++      });
++  }, [userId]);
++
++  return <Badge variant={plan === "pro" ? "pro" : "default"}>{plan === "pro" ? "Pro" : "무료"}</Badge>;
++}

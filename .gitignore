@@ -25,3 +25,6 @@ playwright-report/
 
 # 성능 루프 원본 Lighthouse JSON·에이전트 출력(scripts/perf_loop.py)
 .perf/
+
+# 하네스 Eval 실행 결과(scripts/eval_harness.py). 남길 실행만 git add -f로 커밋한다.
+evals/harness/runs/

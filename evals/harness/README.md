@@ -11,6 +11,8 @@ python -m unittest scripts/test_eval_harness.py         # 러너 자체 테스�
 ```
 
 종료 코드: 전부 pass=0, fail 있음=1, review(사람 검토)만 있음=2. 결과는 `runs/<YYYYMMDD-HHMM>/`에 남는다.
+`runs/`는 gitignore돼 있다. 기록으로 남길 실행(첫 실행, 하네스 수정 전후 비교)만 `git add -f evals/harness/runs/<ts>`로 커밋한다.
+한 케이스에서 러너 오류(git 실패 등)가 나도 나머지는 계속 돌고, 그 케이스는 `review`로 보고서에 남는다.
 
 ## 동작
 

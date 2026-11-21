@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { safeNextPath } from "@/lib/auth/safe-next";
-import { createBrowserClient } from "@/lib/supabase/browser";
 import { Button } from "./Button";
 
 export function GoogleLoginButton({ next }: { next: string }) {
@@ -15,6 +14,8 @@ export function GoogleLoginButton({ next }: { next: string }) {
     try {
       const callback = new URL("/auth/callback", process.env.NEXT_PUBLIC_SITE_URL!);
       callback.searchParams.set("next", safeNextPath(next));
+      // Supabase 클라이언트는 클릭할 때만 불러와 /login 첫 로드 JS를 줄인다.
+      const { createBrowserClient } = await import("@/lib/supabase/browser");
       const { error } = await createBrowserClient().auth.signInWithOAuth({
         provider: "google",
         options: { redirectTo: callback.toString() },

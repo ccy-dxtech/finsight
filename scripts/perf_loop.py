@@ -303,7 +303,8 @@ def gated(pages, gate):
 
 
 def main():
-    config = json.loads(GATE_FILE.read_text(encoding="utf-8"))
+    sys.stdout.reconfigure(encoding="utf-8")  # 파이프로 출력할 때 Windows 기본(cp949)으로 한글이 깨지지 않게
+    config =json.loads(GATE_FILE.read_text(encoding="utf-8"))
     gate, max_iter = config["pages"], config["max_iter"]
     branch = git("rev-parse", "--abbrev-ref", "HEAD")
     if branch in ("main", "HEAD") or run(["git", "status", "--porcelain"]).stdout.strip():

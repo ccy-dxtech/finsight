@@ -257,6 +257,16 @@ def run_case(case, out_dir, keep=False):
                 remove_worktree(wt)
 
 
+def safe_run_case(case, out_dir, keep=False, *, run=None):
+    """한 케이스의 러너 오류(git 실패 등)가 나머지 케이스와 report.md를 잃게 하지 않도록 review 행으로 바꾼다."""
+    try:
+        return (run or run_case)(case, out_dir, keep)
+    except Exception as e:  # noqa: BLE001 — 어떤 오류든 사람 검토로 넘긴다
+        return {"id": case["id"], "gate": None, "gate_ok": False,
+                "judge": {"verdict": None, "reason": f"러너 오류: {e}", "cost_usd": 0.0},
+                "verdict": "review", "cost_usd": 0.0, "duration_s": 0.0}
+
+
 def main():
     parser = argparse.ArgumentParser(description="하네스 Eval 러너")
     parser.add_argument("--only", nargs="+", help="이 id의 케이스만 실행")
@@ -272,7 +282,7 @@ def main():
     print(f"하네스 Eval: 케이스 {len(cases)}개 병렬 실행 → {out_dir.relative_to(ROOT)}", file=sys.stderr)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=len(cases)) as pool:
-        futures = {pool.submit(run_case, c, out_dir, args.keep): c["id"] for c in cases}
+        futures = {pool.submit(safe_run_case, c, out_dir, args.keep): c["id"] for c in cases}
         for fut in concurrent.futures.as_completed(futures):
             r = fut.result()
             print(f"  {r['verdict']:>6}  {r['id']}  ({r['duration_s']:.0f}s)", file=sys.stderr)

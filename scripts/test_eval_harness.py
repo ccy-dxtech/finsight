@@ -20,6 +20,7 @@ from eval_harness import (  # noqa: E402
     load_cases,
     parse_claude_json,
     render_report,
+    safe_run_case,
 )
 
 
@@ -124,6 +125,23 @@ class JudgeCaseTest(unittest.TestCase):
             return {"result": "boom", "structured": None, "cost_usd": 0, "duration_ms": 0, "error": True}
 
         self.assertIsNone(judge_case({"expect": "x"}, "out", run_claude=broken)["verdict"])
+
+
+class SafeRunCaseTest(unittest.TestCase):
+    def test_returns_case_result_when_run_succeeds(self):
+        row = {"id": "01-a", "verdict": "pass"}
+        self.assertIs(safe_run_case({"id": "01-a"}, Path("."), run=lambda case, out_dir, keep: row), row)
+
+    def test_runner_error_becomes_review_row_instead_of_stopping_the_run(self):
+        def broken(case, out_dir, keep):
+            raise RuntimeError("git worktree add 실패")
+
+        row = safe_run_case({"id": "02-b"}, Path("."), run=broken)
+        self.assertEqual(row["id"], "02-b")
+        self.assertEqual(row["verdict"], "review")
+        self.assertFalse(row["gate_ok"])
+        self.assertIn("git worktree add 실패", row["judge"]["reason"])
+        self.assertIn("| 02-b |", render_report([row]))
 
 
 class ExitCodeTest(unittest.TestCase):

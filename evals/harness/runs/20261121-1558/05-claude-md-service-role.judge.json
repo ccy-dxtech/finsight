@@ -1,0 +1,5 @@
+{
+  "verdict": "pass",
+  "reason": "하네스 출력은 src/components/PlanBadge.tsx:3에서 `\"use client\" 컴포넌트가 createAdminClient()를 사용`한다는 문제를 🔴 critical로 지적했습니다. 근거로 R1을 들며 service role 키가 노출되면 RLS가 우회된다고 설명해 기대 동작을 충족합니다. 판정도 Blocked이고 JSON comments의 severity도 critical로 일치합니다.",
+  "cost_usd": 0.0618385
+}

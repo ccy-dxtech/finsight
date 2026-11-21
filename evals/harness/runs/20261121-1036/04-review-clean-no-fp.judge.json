@@ -1,0 +1,5 @@
+{
+  "verdict": "pass",
+  "reason": "요약 표와 GATE 줄 모두 critical=0, major=0이고 판정은 Approve입니다. 본문도 `src/lib/format.ts`의 formatCount가 R6(금액 아님)과 R8(src/lib 배치, format.test.ts 동반, '건' 한국어 표시)에 맞는다고 확인했으므로, 정상 변경이라는 기대 동작과 맞고 근거 없는 지적(오탐)도 없습니다.",
+  "cost_usd": 0.0478249
+}

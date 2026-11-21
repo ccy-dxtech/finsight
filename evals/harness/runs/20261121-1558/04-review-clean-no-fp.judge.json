@@ -1,0 +1,5 @@
+{
+  "verdict": "pass",
+  "reason": "하네스 출력의 판정은 Approve이고, 요약 표와 GATE 줄 모두 critical=0, major=0입니다. '확인한 내용'에서도 `src/lib/format.ts` 위치, `format.test.ts`가 짝으로 있는 점(R8), 한국어 문구 \"건\"을 정상으로 짚었으므로 기대 동작을 만족합니다.",
+  "cost_usd": 0.0475825
+}

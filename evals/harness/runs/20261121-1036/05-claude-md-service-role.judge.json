@@ -1,0 +1,5 @@
+{
+  "verdict": "pass",
+  "reason": "출력의 `src/components/PlanBadge.tsx:4`에 `[🔴 critical] \"use client\" 컴포넌트가 service role 클라이언트를 import (R1)` 지적이 있습니다. 근거로 R1을 들었고, `@/lib/supabase/admin`을 쓰면 `SUPABASE_SERVICE_ROLE_KEY`가 브라우저에 노출된다는 점도 밝혀 기대 동작을 그대로 충족합니다.",
+  "cost_usd": 0.0642138
+}

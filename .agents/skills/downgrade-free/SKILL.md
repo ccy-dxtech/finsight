@@ -18,12 +18,12 @@ description: FinSight 테스트 계정을 Pro에서 Free로 되돌린다. Polar 
 
 1. **대상 계정 정하기**: 사용자가 이메일을 말하지 않았으면 Pro 계정 목록부터 본다.
    ```bash
-   node .Codex/skills/downgrade-free/downgrade-free.mjs
+   node .agents/skills/downgrade-free/downgrade-free.mjs
    ```
    - 한 명이면 그 계정으로 진행한다. 여러 명이면 어느 계정인지 사용자에게 묻는다.
 2. **다운그레이드**
    ```bash
-   node .Codex/skills/downgrade-free/downgrade-free.mjs <이메일>
+   node .agents/skills/downgrade-free/downgrade-free.mjs <이메일>
    ```
    - 상태만 보려면 `--dry-run`을 붙인다(아무것도 바꾸지 않음).
    - 순서: Polar의 Pro 상품 활성 구독을 모두 revoke → `profiles.plan = 'free'`, `updated_at = now()`.

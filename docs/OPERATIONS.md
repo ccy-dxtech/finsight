@@ -68,6 +68,7 @@ if ($c) { (Get-CimInstance Win32_Process -Filter "ProcessId=$($c.OwningProcess)"
 | 테스트 계정을 프로에서 무료로 되돌린다 | `/downgrade-free` 스킬(Polar 구독 해지 + `profiles.plan`) |
 | 분석 횟수를 되돌려 줘야 한다 | Supabase > 이번 달 분석 횟수 되돌리기 |
 | E2E 계정이 DB에 남아 있다 | E2E 테스트 계정 |
+| 공개 페이지 성능을 자동으로 개선하고 싶다 | 성능 루프 |
 
 ## 로컬 서버 기타
 
@@ -285,3 +286,19 @@ $env:E2E_KEEP_USERS = "1"; npx playwright test tests/e2e/s5-quota.spec.ts; Remov
 ```
 - 끝난 뒤 위 "사용자 상태 보기" SQL에 `e2e-a@finsight.test`를 넣어 DB 상태를 본다.
 - 실패 기록은 `npx playwright show-report`로 연다.
+
+## 성능 루프
+`scripts/perf_loop.py`가 공개 페이지(`/`, `/login`)를 모바일 Lighthouse로 재고 → `claude -p`로 병목 분석 → `claude -p`로 처방 적용 → 검사·재측정을 게이트 통과나 3바퀴까지 반복한다. 게이트와 바퀴 수는 `perf/gate.json`, 바퀴별 전/후 표는 `docs/perf/lighthouse-loop.md`, 원본 JSON과 에이전트 출력은 `.perf/runs/<시각>/`(gitignore)에 남는다.
+```powershell
+git worktree add .claude/worktrees/perf-loop -b perf/lighthouse-loop main   # 격리된 작업 브랜치
+cd .claude/worktrees/perf-loop; Copy-Item ..\..\..\.env.local .env.local; npm ci
+python scripts/perf_loop.py                                                  # 한 번 시작하면 스스로 멈춘다
+python -m unittest scripts/test_perf_loop.py                                 # 게이트·멈춤 판정 테스트
+```
+- 바퀴를 되돌릴 때 그 바퀴 시작 커밋으로 작업 트리를 강제로 되돌리고 새 파일을 지우므로, 작업 트리가 깨끗하고 main이 아닌 브랜치에서만 시작한다. 커밋하지 않은 파일이 있는 체크아웃에서 돌리지 않는다.
+- 측정 서버는 3100번(`next start -p 3100`)이다. 3000번 개발 서버와 함께 떠 있어도 된다. 3100번이 이미 쓰이고 있으면 측정하지 않는다.
+- 게이트는 바이트·항목 수(실행마다 같은 값)만 쓴다. 점수·LCP·TBT·CLS는 실행마다 출렁여 참고로만 기록한다. 총 바이트는 HTML 크기가 1바이트쯤 흔들려 한도에 1KB 여유를 뒀다.
+- 바퀴마다 `npm run lint`·`npm run test`·`npm run build`와 스모크(페이지 200 + 핵심 문구)를 통과해야 커밋한다. 실패하거나 pre-commit 리뷰가 커밋을 막으면 그 바퀴 변경을 되돌린다.
+- 멈춤 이유: `gate_passed`(게이트 통과), `max_iter`(3바퀴), `no_diff`(에이전트가 아무것도 바꾸지 않음), `stalled`(게이트 지표가 하나도 줄지 않음).
+- 바퀴마다 `claude -p` 2번(분석·적용)과 pre-commit 리뷰 1번이 돌아 API 비용이 든다.
+- 끝나면 PR을 열어 review-code Action의 GATE를 거쳐 사람이 머지한다. 머지·배포 뒤 배포 주소를 다시 잰다.

@@ -16,6 +16,7 @@ from perf_loop import (  # noqa: E402
     failing_audits,
     median_metrics,
     render_section,
+    run,
     stop_reason,
 )
 
@@ -122,6 +123,13 @@ class FailingAuditsTest(unittest.TestCase):
         self.assertIn("render-blocking-insight", text)
         self.assertNotIn("font-display-insight", text)
         self.assertNotIn("diagnostics", text)
+
+
+class RunTest(unittest.TestCase):
+    def test_timeout_returns_failed_result_instead_of_raising(self):
+        result = run([sys.executable, "-c", "import time; time.sleep(5)"], timeout=0.2)
+        self.assertEqual(result.returncode, 124)
+        self.assertIn("timeout", result.stderr)
 
 
 class RenderSectionTest(unittest.TestCase):

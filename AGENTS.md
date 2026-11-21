@@ -33,6 +33,7 @@ npm run dev      # 개발 서버
 npm run build    # 프로덕션 빌드
 npm run lint     # ESLint
 npm run test     # 테스트
+python scripts/eval_harness.py  # 하네스 Eval(스킬·CLAUDE.md·AGENTS.md·REVIEW_RULES를 고친 뒤, evals/harness/README.md)
 
 <!-- BEGIN:nextjs-agent-rules -->
 

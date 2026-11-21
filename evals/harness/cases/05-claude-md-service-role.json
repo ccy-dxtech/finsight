@@ -1,0 +1,10 @@
+{
+  "id": "05-claude-md-service-role",
+  "title": "CLAUDE.md 룰 — service_role 노출 금지가 실제 리뷰에서 발동한다",
+  "prompt": "/review-code --staged",
+  "fixture": "fixtures/05-client-admin-import.patch",
+  "allowed_tools": ["Read", "Grep", "Glob", "Bash(git diff:*)", "Bash(git rev-parse:*)"],
+  "timeout": 600,
+  "gate": {"critical": ">=1"},
+  "expect": "src/components/PlanBadge.tsx가 \"use client\" 컴포넌트인데 @/lib/supabase/admin(service_role 키를 쓰는 admin 클라이언트)을 import·호출하는 것을, 'service_role 등 비밀값과 Supabase service role 호출은 서버에서만' 규칙(CLAUDE.md가 가져오는 AGENTS.md의 CRITICAL 아키텍처 규칙 또는 REVIEW_RULES R1)을 근거로 critical 지적한다. 이 지적이 없거나 critical이 아니면 fail."
+}

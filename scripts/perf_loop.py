@@ -18,6 +18,7 @@ import statistics
 import subprocess
 import sys
 import time
+import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -165,8 +166,12 @@ def changed_paths():
 
 
 def fetch(url):
-    with urllib.request.urlopen(url, timeout=10) as response:
-        return response.status, response.read().decode("utf-8", "replace")
+    """응답이 오면 상태 코드와 본문을 돌려준다(404·500 포함). 연결이 안 될 때만 OSError를 던진다."""
+    try:
+        with urllib.request.urlopen(url, timeout=10) as response:
+            return response.status, response.read().decode("utf-8", "replace")
+    except urllib.error.HTTPError as error:
+        return error.code, ""
 
 
 def page_slug(page):
@@ -367,6 +372,12 @@ def main():
             after_failures = check_gate(after, gate)
             reason = stop_reason(iteration, max_iter, after_failures, gated(pages, gate), gated(after, gate), True)
             rows.append({"iter": iteration, "pages": after, "status": "적용", "failures": after_failures})
+            if reason == "stalled":  # 게이트 지표가 하나도 줄지 않은 변경은 남기지 않는다.
+                revert(start_sha)
+                rows[-1].update(status="되돌림", note="개선 없음(stalled)")
+                log(f"바퀴 {iteration}: 게이트 지표가 줄지 않아 되돌림")
+                write_doc(prefix, started, rows, reason)
+                continue
             write_doc(prefix, started, rows, reason)
             run(["git", "add", "-A"])
             commit = run(["git", "commit", "-m", f"perf: 성능 루프 바퀴 {iteration} — 게이트 미달 "

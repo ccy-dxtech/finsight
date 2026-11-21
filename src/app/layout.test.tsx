@@ -19,6 +19,12 @@ test("한국어 문서에 기본 글꼴·줄바꿈·색을 적용하고 본문�
   expect(metadata.title).toBe("FinSight");
 });
 
+test("Pretendard 글꼴은 body 안의 FontLoader가 불러와요", () => {
+  const source = readFileSync(new URL("./layout.tsx", import.meta.url), "utf8");
+  expect(source).toMatch(/import \{ FontLoader \} from "@\/components\/FontLoader"/);
+  expect(source).toMatch(/<body[^>]*>\s*<FontLoader \/>/);
+});
+
 test("브라우저 탭 아이콘은 초록 포인트 색의 app/icon.svg예요", () => {
   const svg = readFileSync(new URL("./icon.svg", import.meta.url), "utf8");
   expect(svg).toContain("<svg");

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
+import { FontLoader } from "@/components/FontLoader";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,6 +12,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ko">
       <body className="font-sans break-keep text-body bg-canvas text-body-md">
+        <FontLoader />
         {children}
       </body>
     </html>

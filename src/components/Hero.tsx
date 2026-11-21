@@ -1,11 +1,11 @@
+import { Check, ShieldCheck } from "lucide-react";
 import { Badge } from "./Badge";
 import { Button } from "./Button";
-import { Icon } from "./Icon";
 
 const reassurances = [
-  { icon: "shield-check", text: "원본 파일은 저장하지 않아요. 날짜·가맹점·금액만 남겨요." },
-  { icon: "check", text: "무료로 매달 3회 분석할 수 있어요." },
-] as const;
+  { Icon: ShieldCheck, text: "원본 파일은 저장하지 않아요. 날짜·가맹점·금액만 남겨요." },
+  { Icon: Check, text: "무료로 매달 3회 분석할 수 있어요." },
+];
 
 export function Hero({ isLoggedIn }: { isLoggedIn: boolean }) {
   return (
@@ -24,9 +24,9 @@ export function Hero({ isLoggedIn }: { isLoggedIn: boolean }) {
             {isLoggedIn ? "대시보드로 가기" : "시작하기"}
           </Button>
           <ul className="mt-6 grid gap-2 text-body-sm text-body">
-            {reassurances.map(({ icon, text }) => (
+            {reassurances.map(({ Icon, text }) => (
               <li key={text} className="flex items-start gap-2">
-                <Icon name={icon} size={20} strokeWidth={1.5} aria-hidden="true" className="shrink-0 text-primary" />
+                <Icon size={20} strokeWidth={1.5} aria-hidden="true" className="shrink-0 text-primary" />
                 {text}
               </li>
             ))}

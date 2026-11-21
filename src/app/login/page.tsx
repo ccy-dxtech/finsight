@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { GoogleLoginButton } from "@/components/GoogleLoginButton";
 import { safeNextPath } from "@/lib/auth/safe-next";
@@ -16,8 +17,7 @@ export default async function LoginPage({ searchParams }: {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-8 text-center break-keep">
       <div className="flex flex-col items-center gap-3">
-        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- 공개 페이지에서 next/link 클라이언트 청크를 빼려고 일반 링크를 쓴다 */}
-        <a href="/" className="text-title-md font-extrabold text-ink">Fin<b className="text-primary">Sight</b></a>
+        <Link href="/" className="text-title-md font-extrabold text-ink">Fin<b className="text-primary">Sight</b></Link>
         <p className="text-body-lg text-body">{message}</p>
       </div>
       <GoogleLoginButton next={next} />

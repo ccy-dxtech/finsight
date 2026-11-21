@@ -1,6 +1,6 @@
+import { Check, Minus } from "lucide-react";
 import { Badge } from "./Badge";
 import { Button } from "./Button";
-import { Icon } from "./Icon";
 
 type PricingTierProps = {
   tier: "free" | "pro";
@@ -27,9 +27,10 @@ export function PricingTier({ tier, priceLabel }: PricingTierProps) {
       <ul className="grid gap-3 text-body-md">
         {features.map((feature, index) => {
           const unavailable = !isPro && index === 2;
+          const Icon = unavailable ? Minus : Check;
           return (
             <li key={feature} className={`flex gap-2 ${unavailable ? "text-muted" : "text-body"}`}>
-              <Icon name={unavailable ? "minus" : "check"} size={20} strokeWidth={1.5} aria-hidden="true" className={`mt-1 shrink-0 ${unavailable ? "text-body" : "text-primary"}`} />
+              <Icon size={20} strokeWidth={1.5} aria-hidden="true" className={`mt-1 shrink-0 ${unavailable ? "text-body" : "text-primary"}`} />
               {feature}
             </li>
           );

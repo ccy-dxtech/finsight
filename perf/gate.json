@@ -1,0 +1,24 @@
+{
+  "max_iter": 3,
+  "runs_per_page": 3,
+  "pages": {
+    "/": {
+      "render_blocking": 0,
+      "legacy_js_bytes": 0,
+      "script_bytes": 143651,
+      "font_bytes": 265088,
+      "total_bytes": 439167
+    },
+    "/login": {
+      "render_blocking": 0,
+      "legacy_js_bytes": 0,
+      "script_bytes": 160000,
+      "font_bytes": 81612,
+      "total_bytes": 322155
+    }
+  },
+  "smoke": {
+    "/": "나에게 맞는 요금제",
+    "/login": "Google 계정으로 로그인"
+  }
+}
